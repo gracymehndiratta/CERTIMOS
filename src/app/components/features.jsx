@@ -24,7 +24,7 @@ export default function FeaturesPage() {
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-10 w-32 h-32 bg-[#54D1DC] rounded-full opacity-5 blur-3xl animate-pulse"></div>
         <div
-          className="absolute bottom-1/4 right-10 w-40 h-40 bg-[#358289] rounded-full opacity-5 blur-3xl animate-pulse"
+          className="absolute bottom-1/4 right-10 w-40 h-40 bg-[#2cf2f9] rounded-full opacity-5 blur-3xl animate-pulse"
           style={{ animationDelay: "2s" }}
         ></div>
         <div
@@ -35,7 +35,7 @@ export default function FeaturesPage() {
 
       {/* Header */}
       <div className="relative z-10 text-center pt-20 pb-12">
-        <h1 className="text-6xl md:text-6xl font-bold text-[#358289] mb-4">
+        <h1 className="text-6xl md:text-6xl font-bold text-[#43cfdc] mb-4">
           Features
         </h1>
         <p className="text-xl text-gray-300 max-w-2xl mx-auto px-4">
@@ -44,7 +44,7 @@ export default function FeaturesPage() {
       </div>
 
       {/* Flowing Menu - Full Width Horizontal Strip */}
-      <div className="relative w-full h-[30vh] mb-16 z-10">
+      <div className="relative w-[300vh] h-[60vh] mb-16 z-10">
         <FlowingMenu
           items={flowingMenuItems}
           onSelect={(item) => setSelectedFeature(item.originalFeature)}

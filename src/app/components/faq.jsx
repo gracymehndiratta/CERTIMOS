@@ -11,69 +11,89 @@ export default function Faq() {
 
   const faqData = [
     {
-      question: "What is this platform about?",
+      question: "What problem does Certimos solve?",
       answer:
-        "It’s a web-based complaint tracking system where residents can raise issues, staff can manage them, and owners can monitor everything in one dashboard.",
+        "Certificates today are often vulnerable to fraud, difficult to verify, and can get lost in emails or PDFs. ",
     },
     {
-      question: "How is this different from WhatsApp groups or forms?",
+      question:
+        "What makes Certimos different from traditional PDFs or central databases?",
       answer:
-        "Unlike scattered chats or forms, our platform keeps every complaint organized with status updates, staff assignments, and transparent tracking.",
+        " Certimos uses blockchain to guarantee long-term authenticity, transparency, and accessibility.",
     },
     {
-      question: "Do residents need any technical knowledge to use it?",
+      question: "How do participants receive and view their certificates?",
       answer:
-        "Not at all. The interface is simple—residents just log in, file a complaint, and track its progress.",
+        "Event organizers upload participant lists,users can view and share all their credentials through the Certimos dashboard.",
     },
     {
-      question: "What happens if a complaint is unresolved for a long time?",
+      question: "Do I need to understand blockchain to use Certimos?",
       answer:
-        "The system allows owners to track pending complaints and escalate them if they remain unresolved, ensuring accountability and timely action.",
+        "Not at all. Participants just log in, connect their wallet, and access their certificates in a simple React-based dashboard.",
     },
     {
-      question: "Can staff also post notices, or only owners?",
+      question: "Is my personal data safe on Certimos?",
       answer:
-        "Only owners/admins can post official notices to maintain authenticity and prevent misuse. Staff and residents can only view them.",
+        "Yes. Sensitive personal data is not stored directly on-chain.",
     },
     {
-      question: "Is my data safe on this platform?",
+      question: "How scalable is the system for large events or universities?",
       answer:
-        "Yes, your data is secure and only accessible based on your role (resident, staff, or owner).",
+        "Certimos is built to handle thousands of certificates at once, making it suitable for large-scale academic programs, training sessions.",
     },
   ];
 
   return (
     <section
-      className="faq-section py-16 bg-black text-white select-none"
+      className="faq-section py-20 bg-black text-white select-none"
       id="faq"
     >
-      <h2 className="text-4xl font-bold text-center mb-12 text-[#358289]">
+      <h2 className="text-5xl font-bold text-center mb-16 text-[#358289]">
         Frequently Asked Questions
       </h2>
 
-      <div className="faq-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4 max-w-6xl mx-auto">
+      <div className="faq-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-6 max-w-6xl mx-auto">
         {faqData.map((item, index) => (
           <div
             key={index}
-            className={`faq-flip-card perspective w-full h-48`}
-            onMouseEnter={() => toggleFlip(index)}
-            onMouseLeave={() => toggleFlip(index)}
+            className="faq-flip-card perspective cursor-pointer"
+            onClick={() => toggleFlip(index)}
           >
             <div
-              className={`faq-flip-inner relative w-full h-full transition-transform duration-500 ${
+              className={`faq-flip-inner relative w-full min-h-[300px] transition-transform duration-500 transform-style-preserve-3d ${
                 flippedIndex === index ? "rotate-y-180" : ""
               }`}
             >
-              <div className="faq-front absolute w-full h-full backface-hidden flex items-center justify-center p-4 bg-[#358289] rounded-xl text-center text-white font-medium text-lg">
+              {/* Front */}
+              <div className="faq-front absolute w-full h-full backface-hidden flex items-center justify-center p-8 bg-[#358289] rounded-2xl text-center text-white font-semibold text-xl">
                 {item.question}
               </div>
-              <div className="faq-back absolute w-full h-full backface-hidden rotate-y-180 flex items-center justify-center p-4 bg-white/10 rounded-xl text-center text-white text-sm">
+
+              {/* Back */}
+              <div className="faq-back absolute w-full h-full backface-hidden rotate-y-180 flex items-center justify-center p-8 bg-white/10 rounded-2xl text-center text-white text-base leading-relaxed">
                 {item.answer}
               </div>
             </div>
           </div>
         ))}
       </div>
+
+    
+      <style jsx>{`
+        .perspective {
+          perspective: 1000px;
+        }
+        .faq-flip-inner {
+          transform-style: preserve-3d;
+        }
+        .backface-hidden {
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+          transform: rotateY(180deg);
+        }
+      `}</style>
     </section>
   );
 }
