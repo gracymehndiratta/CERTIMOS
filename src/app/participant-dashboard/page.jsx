@@ -14,7 +14,7 @@ const CONTRACT_ABI = [
   "function totalSupply() view returns (uint256)",
   "function tokenByIndex(uint256 index) view returns (uint256)",
   "function supportsInterface(bytes4 interfaceId) view returns (bool)",
-  // ERC721 events
+ 
   "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)",
 ];
 
@@ -102,7 +102,7 @@ export default function ParticipantDashboard() {
 
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      addDebugInfo("✅ Provider and signer connected");
+      addDebugInfo(" Provider and signer connected");
 
       // Fetch XDC balance
       const bal = await provider.getBalance(address);
@@ -435,66 +435,77 @@ export default function ParticipantDashboard() {
   if (!wallet) return <div>Loading wallet...</div>;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white px-8 py-12">
-      <header className="flex justify-between items-center mb-12">
-        <h1 className="text-4xl font-bold">Your Dashboard</h1>
-        <div className="text-xl">
-          Wallet: {wallet} <br />
-          Balance: {balance ? `${balance} XDC` : "Loading..."}
+    <div className="min-h-screen bg-gradient-to-b from-black via-[#0a0a0f] to-black text-white px-6 py-8 select-none">
+      <header className="sticky top-0 z-20 bg-black/70 backdrop-blur-lg flex justify-between items-center px-4 py-4 mb-10 rounded-xl border border-white/10 shadow-lg">
+        <h1 className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-teal-400 to-cyan-500 bg-clip-text text-transparent animate-pulse">
+          🎓 Your Dashboard
+        </h1>
+        <div className="text-sm md:text-base text-gray-300 text-right">
+          <p className="truncate">Wallet: {wallet}</p>
+          <p className="text-teal-300 font-semibold">
+            Balance: {balance ? `${balance} XDC` : "Loading..."}
+          </p>
         </div>
       </header>
 
-      {/* Debug Information Section */}
+      {/* Debug Info */}
       {debugInfo && (
-        <section className="mb-8">
-          <details className="bg-gray-800 rounded-lg p-4">
-            <summary className="cursor-pointer text-yellow-400 font-semibold">
-              🐛 Debug Information (Click to expand)
-            </summary>
-            <pre className="mt-4 text-xs text-gray-300 whitespace-pre-wrap bg-gray-900 p-4 rounded overflow-x-auto">
-              {debugInfo}
-            </pre>
-          </details>
-        </section>
+        <details className="mb-6 bg-white/5 rounded-lg border border-white/10 p-4">
+          <summary className="cursor-pointer text-yellow-400 font-semibold">
+            🐛 Debug Information
+          </summary>
+          <pre className="mt-3 text-xs text-gray-400 whitespace-pre-wrap">
+            {debugInfo}
+          </pre>
+        </details>
       )}
 
+      {/* Certificates */}
       <section>
-        <h2 className="text-3xl font-bold mb-6">Your Certificates</h2>
+        <h2 className="text-2xl md:text-3xl font-bold mb-6">
+          📜 Your Certificates
+        </h2>
+
         {loading ? (
-          <p>Loading certificates...</p>
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-12 h-12 border-4 border-teal-400 border-t-transparent rounded-full animate-spin"></div>
+            <p className="mt-4 text-gray-400">Fetching certificates...</p>
+          </div>
         ) : certificates.length === 0 ? (
-          <div className="bg-yellow-900 border border-yellow-600 rounded-lg p-4">
-            <p className="text-yellow-200">
+          <div className="bg-yellow-900/50 border border-yellow-700 rounded-lg p-6 text-center">
+            <p className="text-yellow-300 text-lg font-medium">
               No certificates found in this wallet.
-            </p>
-            <p className="text-yellow-300 text-sm mt-2">
-              Check the debug information above to see what methods were
-              attempted.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {certificates.map((cert) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {certificates.map((cert, index) => (
               <div
                 key={cert.tokenId}
-                className="bg-gray-800 rounded-xl shadow-lg p-6"
+                className="bg-white/10 rounded-2xl p-6 shadow-xl transform hover:scale-105 hover:shadow-teal-500/40 transition-all duration-300 opacity-0 animate-fade-in"
+                style={{
+                  animationDelay: `${index * 150}ms`,
+                  animationFillMode: "forwards",
+                }}
               >
                 <img
                   src={
                     resolveIPFS(cert.image) || "/placeholder-certificate.png"
                   }
                   alt={cert.name}
-                  className="w-full h-48 object-contain mb-4 rounded-lg"
-                  onError={(e) => {
-                    e.target.src = "/placeholder-certificate.png";
-                  }}
+                  className="w-full h-52 object-contain mb-4 rounded-lg"
+                  onError={(e) =>
+                    (e.target.src = "/placeholder-certificate.png")
+                  }
                 />
-                <h3 className="text-xl font-bold mb-2">
+                <h3 className="text-lg font-bold text-teal-300">
                   {cert.name || `Certificate #${cert.tokenId}`}
                 </h3>
-                <p className="text-gray-300 mb-2">Token ID: {cert.tokenId}</p>
+                <p className="text-gray-400 text-sm mb-2">
+                  Token ID: {cert.tokenId}
+                </p>
                 {cert.description && (
-                  <p className="text-gray-400 mb-2 text-sm">
+                  <p className="text-gray-300 text-sm mb-2">
                     {cert.description}
                   </p>
                 )}
@@ -503,7 +514,7 @@ export default function ParticipantDashboard() {
                     href={`https://explorer.apothem.network/tx/${cert.transactionHash}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#54D1DC] underline"
+                    className="text-cyan-400 underline text-sm"
                   >
                     View on Apothem Explorer
                   </a>

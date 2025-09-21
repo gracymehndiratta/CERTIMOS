@@ -38,29 +38,13 @@ export default function LandingPage() {
   return (
     <section
       id="home"
-      className="min-h-screen flex flex-col items-center justify-center px-4 py-20 relative"
+      className="min-h-screen flex flex-col items-center justify-center px-4 py-20 relative select-none"
     >
       {/* Grid Background - Full screen */}
-      <div
-        className="absolute  w-full h-full"
-        style={{ width: "100vw", height: "100vh" }}
-      >
-        <DotGrid
-          dotSize={5}
-          gap={12}
-          baseColor="#271E37"
-          activeColor="#358289"
-          proximity={120}
-          shockRadius={250}
-          shockStrength={5}
-          resistance={750}
-          returnDuration={1.5}
-          className="w-full h-full"
-        />
-      </div>
+  
 
       {/* Content overlay */}
-      <div className="max-w-7xl w-full flex flex-col lg:flex-row items-start justify-start relative z-20">
+      <div className="max-w-7xl w-full flex flex-col lg:flex-row items-start justify-start relative z-40">
         <div className="flex-1 max-w-2xl text-left">
           <h1 className=" px-6 py-6 text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
             CERTIMOS.
@@ -73,7 +57,7 @@ export default function LandingPage() {
           <div className="flex flex-col md:flex-row gap-4 justify-start">
             <button
               onClick={() => setShowModal(true)}
-              className="rounded-lg bg-white text-black px-6 py-4 text-2xl font-bold hover:scale-105 transition-transform"
+              className="rounded-lg bg-white text-black px-6 py-4 z-20 text-2xl font-bold hover:scale-105 transition-transform"
             >
               ISSUE CERTIFICATES
             </button>
