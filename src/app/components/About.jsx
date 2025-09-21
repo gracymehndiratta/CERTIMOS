@@ -90,20 +90,20 @@ export default function AboutPage() {
       {/* Animated items */}
       <div className="relative z-10">
         <AnimatedItem
-          id="transparency"
-          text="TRANSPARENCY"
+          id="future"
+          text="Future-Proof"
           imgSrc="/transparency.svg"
           isReversed={false}
         />
         <AnimatedItem
-          id="accountability"
-          text="ACCOUNTABILITY"
+          id="accessibility"
+          text="Global Accessibility"
           imgSrc="/accountability.svg"
           isReversed={true}
         />
         <AnimatedItem
-          id="inclusivity"
-          text="INCLUSIVITY"
+          id="Blockchain"
+          text="Blockchain-Powered Certificates"
           imgSrc="/inclusivity.svg"
           isReversed={false}
         />

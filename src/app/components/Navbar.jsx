@@ -62,7 +62,7 @@ export default function Navbar() {
                 href="/login"
                 className="px-6 py-3 bg-white text-black rounded-full shadow-lg hover:bg-gray-100 transition-all duration-200 hover:scale-105 font-bold text-sm"
               >
-                VERIFY CERTIFICATE
+                VERIFY CERTIFICATES
               </a>
             </div>
 
