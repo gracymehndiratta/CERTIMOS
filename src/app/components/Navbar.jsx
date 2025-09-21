@@ -34,7 +34,7 @@ export default function Navbar() {
             {/* Logo */}
             <div className="relative w-[160px] h-[60px]">
               <Image
-                src="/logo.svg"
+                src="/logo.webp"
                 alt="Logo"
                 fill
                 className="text-white object-contain"
