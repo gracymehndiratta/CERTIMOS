@@ -2,73 +2,89 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Threads from "./ui/Threads";
+
+import DotGrid from "./ui/DotGrid"; // Updated import
 
 export default function LandingPage() {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
 
-   const handleConnectWallet = async () => {
-     if (typeof window.ethereum !== "undefined") {
-       try {
-         const accounts = await window.ethereum.request({
-           method: "eth_requestAccounts",
-         });
+  const handleConnectWallet = async () => {
+    if (typeof window.ethereum !== "undefined") {
+      try {
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
 
-         const walletAddress = accounts[0];
-         console.log("Connected wallet:", walletAddress);
+        const walletAddress = accounts[0];
+        console.log("Connected wallet:", walletAddress);
 
-      
-         localStorage.setItem("walletAddress", walletAddress);
+   
+        localStorage.setItem("walletAddress", walletAddress);
 
+        // Redirect to dashboard
+        router.push("/participant-dashboard"); // change this route as needed
+      } catch (err) {
+        console.error(err);
+        alert("Wallet connection failed");
+      }
+    } else {
+      alert(
+        "MetaMask is not installed! Please install it from https://metamask.io/"
+      );
+    }
+  };
 
-         router.push("/participant-dashboard"); // change this route as needed
-       } catch (err) {
-         console.error(err);
-         alert("Wallet connection failed");
-       }
-     } else {
-       alert(
-         "MetaMask is not installed! Please install it from https://metamask.io/"
-       );
-     }
-   };
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center px-12 py-20 overflow-hidden"
+      className="min-h-screen flex flex-col items-center justify-center px-4 py-20 relative"
     >
-      {/* Background animation */}
-      <div className="absolute inset-0 width-100vw height-100vw">
-        <Threads amplitude={2} distance={0} enableMouseInteraction={true} />
+      {/* Grid Background - Full screen */}
+      <div
+        className="absolute  w-full h-full"
+        style={{ width: "100vw", height: "100vh" }}
+      >
+        <DotGrid
+          dotSize={5}
+          gap={12}
+          baseColor="#271E37"
+          activeColor="#358289"
+          proximity={120}
+          shockRadius={250}
+          shockStrength={5}
+          resistance={750}
+          returnDuration={1.5}
+          className="w-full h-full"
+        />
       </div>
 
-      {/* Hero Section */}
-      <div className="relative z-20 max-w-3xl right-10 text-left">
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
-          CERTIMOS.
-        </h1>
-        <h2 className="text-3xl px-6 font-bold text-[#358289] leading-tight">
-          Life Verified.
-        </h2>
-        <p className="text-xl md:text-2xl lg:text-3xl mt-4 mb-8 text-white">
-          Tamper-proof, permanent, and verifiable credentials
-        </p>
+      {/* Content overlay */}
+      <div className="max-w-7xl w-full flex flex-col lg:flex-row items-start justify-start relative z-20">
+        <div className="flex-1 max-w-2xl text-left">
+          <h1 className=" px-6 py-6 text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
+            CERTIMOS.
+          </h1>
+        
+          <p className=" px-6 py-6 opacity-55 text-xl md:text-2xl lg:text-3xl mt-4 mb-8 text-white">
+            Tamper-proof, permanent, and verifiable credentials
+          </p>
 
-        <div className="flex flex-col md:flex-row gap-4">
-          <button
-            onClick={() => setShowModal(true)}
-            className="rounded-lg bg-[#358289] px-8 py-4 text-2xl font-bold hover:scale-105 transition-transform"
-          >
-            ISSUE CERTIFICATES
-          </button>
+          <div className="flex flex-col md:flex-row gap-4 justify-start">
+            <button
+              onClick={() => setShowModal(true)}
+              className="rounded-lg bg-white text-black px-6 py-4 text-2xl font-bold hover:scale-105 transition-transform"
+            >
+              ISSUE CERTIFICATES
+            </button>
 
-          <button
-            onClick={handleConnectWallet}
-            className="rounded-lg bg-[#54D1DC] px-8 py-4 text-2xl font-bold hover:scale-105 transition-transform"
-          >
-            VIEW CERTIFICATES
-          </button>
+            <button
+              onClick={handleConnectWallet}
+              className="rounded-lg bg-black text-white px-8 py-4 border-white text-2xl font-bold hover:scale-105 transition-transform"
+            >
+              VIEW CERTIFICATES
+            </button>
+          </div>
         </div>
       </div>
     </section>
