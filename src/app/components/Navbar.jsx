@@ -32,12 +32,12 @@ export default function Navbar() {
         >
           <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
             {/* Logo */}
-            <div className="relative w-[60px] h-[60px]">
+            <div className="relative w-[160px] h-[60px]">
               <Image
-                src="/logo.png"
+                src="/logo.svg"
                 alt="Logo"
                 fill
-                className="object-contain"
+                className="text-white object-contain"
               />
             </div>
 

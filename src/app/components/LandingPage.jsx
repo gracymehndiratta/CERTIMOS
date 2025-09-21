@@ -1,8 +1,10 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function LandingPage() {
+     const router = useRouter();
   const [showModal, setShowModal] = useState(false);
   const [step, setStep] = useState("roles");
 
@@ -29,22 +31,31 @@ export default function LandingPage() {
   };
 
   // Simulate wallet connection
-  const handleConnectWallet = async () => {
-    if (typeof window.ethereum !== "undefined") {
-      try {
-        const accounts = await window.ethereum.request({
-          method: "eth_requestAccounts",
-        });
-        alert(`Connected wallet: ${accounts[0]}`);
-        // Redirect to participant dashboard or handle state
-      } catch (err) {
-        console.error(err);
-        alert("Wallet connection failed");
-      }
-    } else {
-      alert("MetaMask is not installed!");
-    }
-  };
+ const handleConnectWallet = async () => {
+   if (typeof window.ethereum !== "undefined") {
+     try {
+       const accounts = await window.ethereum.request({
+         method: "eth_requestAccounts",
+       });
+
+       const walletAddress = accounts[0];
+       console.log("Connected wallet:", walletAddress);
+
+       // Optional: store in localStorage for session persistence
+       localStorage.setItem("walletAddress", walletAddress);
+
+       // Redirect to dashboard
+       router.push("/participant-dashboard"); // change this route as needed
+     } catch (err) {
+       console.error(err);
+       alert("Wallet connection failed");
+     }
+   } else {
+     alert(
+       "MetaMask is not installed! Please install it from https://metamask.io/"
+     );
+   }
+ };
 
   return (
     <section
@@ -84,10 +95,10 @@ export default function LandingPage() {
         {/* Right illustration */}
         <div className="flex-1 flex justify-center items-center relative min-h-[400px]">
           <Image
-            src="/landing-house.svg"
+            src="/certimos.svg"
             width={450}
             height={450}
-            alt="Digital Society House"
+            alt=""
           />
         </div>
       </div>
