@@ -31,3 +31,68 @@ body {
 .animate-float {
   animation: float 4s ease-in-out infinite;
 }
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #54D1DC, #358289);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #4bc5d1, #2a6b72);
+}
+
+/* Modal backdrop blur effect */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+/* Focus styles for accessibility */
+input:focus,
+button:focus {
+  outline: 2px solid #54D1DC;
+  outline-offset: 2px;
+}
+
+@layer utilities {
+  /* Custom translate */
+  .translate-101 {
+    transform: translateX(101%);
+  }
+
+  /* Keyframes for marquee */
+  @keyframes marquee {
+    from {
+      transform: translateX(0%);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* Animation class */
+  .animate-marquee {
+    animation: marquee 15s linear infinite;
+  }
+}
+.perspective {
+          perspective: 1000px;
+        }
+        .backface-hidden {
+          backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+          transform: rotateY(180deg);
+        }
