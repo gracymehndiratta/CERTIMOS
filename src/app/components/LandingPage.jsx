@@ -113,7 +113,7 @@ export default function LandingPage() {
 
   return (
     <section
-      id="#home"
+      id="home"
       className="min-h-screen flex flex-col items-center justify-center px-4 py-20 relative select-none"
     >
       {/* Grid Background - Full screen */}
