@@ -30,74 +30,65 @@ export default function Navbar() {
             isScrolled ? "pt-2" : "pt-4"
           }`}
         >
-          <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
-            {/* Logo */}
-            <div className="relative w-[160px] h-[60px]">
-              <Image
-                src="/logo.webp"
-                alt="Logo"
-                fill
-                className="text-white object-contain"
-              />
-            </div>
+          <div className="max-w-7xl mx-auto px-4 flex items-center relative">
+  {/* Logo */}
+  <div className="relative w-[160px] h-[60px] flex-shrink-0">
+    <Image
+      src="/logo.webp"
+      alt="Logo"
+      fill
+      className="text-white object-contain"
+    />
+    <p className="text-2xl font-bold px-27 py-3">CERTIMOS</p>
+  </div>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center justify-between px-9 lg:px-28 py-3 bg-[#3e4040cc] backdrop-blur-md rounded-full shadow-lg border border-white/10 gap-8">
-              {navItems.map(({ label, path }) => (
-                <a
-                  key={label}
-                  href={path}
-                  className="text-lg lg:text-xl font-semibold text-white hover:text-[#54D1DC] transition-colors duration-200 relative group"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {label}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#54D1DC] transition-all duration-300 group-hover:w-full"></span>
-                </a>
-              ))}
-            </nav>
+  {/* Desktop Navigation (Centered) */}
+  <nav className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center px-9 lg:px-28 py-3 bg-[#3e4040cc] backdrop-blur-md rounded-full shadow-lg border border-white/10 gap-8">
+    {navItems.map(({ label, path }) => (
+      <a
+        key={label}
+        href={path}
+        className="text-lg lg:text-xl font-semibold text-white hover:text-[#54D1DC] transition-colors duration-200 relative group"
+        onClick={() => setIsMobileMenuOpen(false)}
+      >
+        {label}
+        <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#54D1DC] transition-all duration-300 group-hover:w-full"></span>
+      </a>
+    ))}
+  </nav>
 
-            {/* Login Button - Desktop */}
-            <div className="hidden md:block">
-              <a
-                href="/login"
-                className="px-6 py-3 bg-white text-black rounded-full shadow-lg hover:bg-gray-100 transition-all duration-200 hover:scale-105 font-bold text-sm"
-              >
-                VERIFY CERTIFICATES
-              </a>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-3 bg-[#3e4040cc] backdrop-blur-md rounded-full shadow-lg border border-white/10 text-white"
-            >
-              <svg
-                className={`w-6 h-6 transition-transform duration-300 ${
-                  isMobileMenuOpen ? "rotate-90" : ""
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                {isMobileMenuOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                )}
-              </svg>
-            </button>
-          </div>
-        </div>
+  {/* Mobile Menu Button (still on the right) */}
+  <button
+    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+    className="md:hidden ml-auto p-3 bg-[#3e4040cc] backdrop-blur-md rounded-full shadow-lg border border-white/10 text-white"
+  >
+    <svg
+      className={`w-6 h-6 transition-transform duration-300 ${
+        isMobileMenuOpen ? "rotate-90" : ""
+      }`}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      {isMobileMenuOpen ? (
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M6 18L18 6M6 6l12 12"
+        />
+      ) : (
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M4 6h16M4 12h16M4 18h16"
+        />
+      )}
+    </svg>
+  </button>
+</div>
+</div>
       </header>
 
       {/* Mobile Menu Overlay */}

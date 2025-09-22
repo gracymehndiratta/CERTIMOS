@@ -9,12 +9,12 @@ export default function AboutPage() {
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center select-none">
       {/* Full-page Dot Grid */}
-      <div className="fixed top-0 left-0 w-full h-full z-10">
+      <div className="fixed top-0 left-0 w-full h-full -z-10">
         <DotGrid
           dotSize={5}
           gap={12}
           baseColor="#271E37"
-          activeColor="#358289"
+          activeColor="#54D1DC"
           proximity={120}
           shockRadius={250}
           shockStrength={5}
@@ -66,7 +66,7 @@ function AnimatedItem({ text, description, imgSrc, isReversed }) {
   const controls = useAnimation();
 
   if (isInView) {
-    controls.start({ opacity: 1, x: 0 });
+    controls.start({ opacity: 1, x: 10 });
   }
 
   return (

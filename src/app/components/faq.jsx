@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import DotGrid from "./ui/DotGrid";
 
 export default function Faq() {
   const [flippedIndex, setFlippedIndex] = useState(null);
@@ -13,18 +14,18 @@ export default function Faq() {
     {
       question: "What problem does Certimos solve?",
       answer:
-        "Certificates today are often vulnerable to fraud, difficult to verify, and can get lost in emails or PDFs. ",
+        "Certificates today are often vulnerable to fraud, difficult to verify, and can get lost in emails or PDFs.",
     },
     {
       question:
         "What makes Certimos different from traditional PDFs or central databases?",
       answer:
-        " Certimos uses blockchain to guarantee long-term authenticity, transparency, and accessibility.",
+        "Certimos uses blockchain to guarantee long-term authenticity, transparency, and accessibility.",
     },
     {
       question: "How do participants receive and view their certificates?",
       answer:
-        "Event organizers upload participant lists,users can view and share all their credentials through the Certimos dashboard.",
+        "Event organizers upload participant lists, and users can view and share all their credentials through the Certimos dashboard.",
     },
     {
       question: "Do I need to understand blockchain to use Certimos?",
@@ -33,68 +34,68 @@ export default function Faq() {
     },
     {
       question: "Is my personal data safe on Certimos?",
-      answer:
-        "Yes. Sensitive personal data is not stored directly on-chain.",
+      answer: "Yes. Sensitive personal data is not stored directly on-chain.",
     },
     {
       question: "How scalable is the system for large events or universities?",
       answer:
-        "Certimos is built to handle thousands of certificates at once, making it suitable for large-scale academic programs, training sessions.",
+        "Certimos is built to handle thousands of certificates at once, making it suitable for large-scale academic programs or training sessions.",
     },
   ];
 
   return (
-    <section
-      className="faq-section py-20 bg-black text-white select-none"
-      id="faq"
-    >
-      <h2 className="text-5xl font-bold text-center mb-16 text-[#358289]">
-        Frequently Asked Questions
-      </h2>
-
-      <div className="faq-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-6 max-w-6xl mx-auto">
-        {faqData.map((item, index) => (
-          <div
-            key={index}
-            className="faq-flip-card perspective cursor-pointer"
-            onMouseEnter={() => toggleFlip(index)}
-            onMouseLeave={() => toggleFlip(index)}
-          >
-            <div
-              className={`faq-flip-inner relative w-full min-h-[300px] transition-transform duration-500 transform-style-preserve-3d ${
-                flippedIndex === index ? "rotate-y-180" : ""
-              }`}
-            >
-              {/* Front */}
-              <div className="faq-front absolute w-full h-full backface-hidden flex items-center justify-center p-8 bg-[#358289] rounded-2xl text-center text-white font-semibold text-xl">
-                {item.question}
-              </div>
-
-              {/* Back */}
-              <div className="faq-back absolute w-full h-full backface-hidden rotate-y-180 flex items-center justify-center p-8 bg-white/10 rounded-2xl text-center text-white text-base leading-relaxed">
-                {item.answer}
-              </div>
-            </div>
-          </div>
-        ))}
+    <section className="faq-section relative select-none" id="faq">
+      {/* Background DotGrid */}
+      <div className="fixed top-0 left-0 w-full h-full -z-10">
+        <DotGrid
+          dotSize={5}
+          gap={12}
+          baseColor="#271E37"
+          activeColor="#358289"
+          proximity={120}
+          shockRadius={250}
+          shockStrength={5}
+          resistance={750}
+          returnDuration={1.5}
+          className="w-full h-full"
+        />
+        {/* Dark overlay to make cards pop */}
+        <div className="absolute top-0 left-0 w-full h-full bg-black/40"></div>
       </div>
 
-    
-      <style jsx>{`
-        .perspective {
-          perspective: 1000px;
-        }
-        .faq-flip-inner {
-          transform-style: preserve-3d;
-        }
-        .backface-hidden {
-          -webkit-backface-visibility: hidden;
-          backface-visibility: hidden;
-        }
-        .rotate-y-180 {
-          transform: rotateY(180deg);
-        }
-      `}</style>
+      {/* Section Content */}
+      <div className="relative z-50 px-4 py-16">
+        <h2 className="faq-title text-white text-3xl sm:text-4xl font-bold mb-10 text-center">
+          Frequently Asked Questions
+        </h2>
+
+        <div className="faq-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
+          {faqData.map((item, index) => (
+            <div
+              key={index}
+              className="faq-flip-card perspective relative w-[320px] h-[220px] sm:w-[380px] sm:h-[260px] lg:w-[420px] lg:h-[280px] cursor-pointer"
+              onMouseEnter={() => toggleFlip(index)}
+              onMouseLeave={() => toggleFlip(index)}
+            >
+              <div
+                className={`faq-flip-inner relative w-full h-full duration-500 transform ${
+                  flippedIndex === index ? "rotate-y-180" : ""
+                }`}
+              >
+                {/* Front */}
+                <div className="faq-front absolute w-full h-full flex items-center justify-center text-center text-lg sm:text-xl font-semibold p-6 bg-[#54D1DC] text-black rounded-2xl shadow-lg backface-hidden">
+                  {item.question}
+                </div>
+
+                {/* Back */}
+                <div className="faq-back absolute w-full h-full flex items-center justify-center text-center text-base sm:text-lg p-6 bg-blue-200 text-gray-800 rounded-2xl shadow-lg rotate-y-180 backface-hidden">
+                  {item.answer}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }

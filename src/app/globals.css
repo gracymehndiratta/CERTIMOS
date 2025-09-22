@@ -135,3 +135,20 @@ html, body {
 }
 
 /* Other global styles... */
+/* FAQ Flip Animation Styles */
+.perspective {
+  perspective: 1000px;
+}
+
+.faq-flip-inner {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}

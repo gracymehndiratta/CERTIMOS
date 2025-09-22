@@ -1,120 +1,152 @@
 "use client";
 
 import { useState } from "react";
-import { featuresData } from "./data/featuresData"; // Your features data
-import FlowingMenu from "./ui/FlowingMenu";
+import DotGrid from "./ui/DotGrid";
+import { motion } from "framer-motion";
 
 export default function FeaturesPage() {
-  const [selectedFeature, setSelectedFeature] = useState(null);
+  const [hoveredCard, setHoveredCard] = useState(null);
 
-  // Map featuresData to FlowingMenu format
-  const flowingMenuItems = featuresData.map((f, idx) => ({
-    link: f.link || "#",
-    text: f.title,
-    image: f.image || `https://picsum.photos/600/400?random=${idx + 1}`,
-    originalFeature: f, // keep original for details
-  }));
+  const organizers = [
+    {
+      title: "Secure Sign-In",
+      description:
+        "Log in to the Organizer Portal using your Google account for secure, authorized access.",
+    },
+    {
+      title: "Enter Event Details",
+      description:
+        "Fill out a simple form with the event name, date, and upload a template for the certificates.",
+    },
+    {
+      title: "Upload Participant List",
+      description:
+        "Provide a CSV file containing participant names and their public wallet addresses.",
+    },
+    {
+      title: "Issue Certificates",
+      description:
+        "With one click, our system mints and delivers secure, verifiable NFT certificates to all participants.",
+    },
+  ];
+
+  const participants = [
+    {
+      title: "Connect Your Wallet",
+      description:
+        "Simply connect your MetaMask or any other compatible crypto wallet. No sign-up is needed.",
+    },
+    {
+      title: "View Your Dashboard",
+      description:
+        "Instantly access your personal dashboard where all your earned NFT certificates are displayed.",
+    },
+    {
+      title: "Manage & Showcase",
+      description:
+        "Click on any certificate to view its details, verify its authenticity on the blockchain, and share it.",
+    },
+    {
+      title: "True Ownership",
+      description:
+        "Your certificates are NFTs that you truly own. They stay in your wallet, forever verifiable and accessible.",
+    },
+  ];
 
   return (
     <section
       id="features"
-      className="min-h-screen select-none bg-black relative overflow-hidden"
+      className="min-h-screen select-none bg-gray-950 text-white relative overflow-hidden"
     >
-      {/* Background decorations */}
-      <div className="absolute inset-0 z-40 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-10 w-32 h-32 bg-[#54D1DC] rounded-full opacity-5 blur-3xl animate-pulse"></div>
-        <div
-          className="absolute bottom-1/4 right-10 w-40 h-40 bg-[#2cf2f9] rounded-full opacity-5 blur-3xl animate-pulse"
-          style={{ animationDelay: "2s" }}
-        ></div>
-        <div
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#4ECDC4] rounded-full opacity-3 blur-3xl animate-pulse"
-          style={{ animationDelay: "4s" }}
-        ></div>
-      </div>
-
-      {/* Header */}
-      <div className="relative z-10 text-center pt-20 pb-12">
-        <h1 className="text-6xl md:text-6xlz-40 font-bold text-[#43cfdc] mb-4">
-          Features
-        </h1>
-        <p className="text-xl text-gray-300 max-w-2xl mx-auto px-4">
-          Experience the future with our comprehensive digital platform
-        </p>
-      </div>
-
-      {/* Flowing Menu - Full Width Horizontal Strip */}
-      <div className="relative w-[300vh] h-[60vh] mb-16 z-10">
-        <FlowingMenu
-          items={flowingMenuItems}
-          onSelect={(item) => setSelectedFeature(item.originalFeature)}
+      {/* Animated DotGrid Background */}
+      <div className="fixed top-0 left-0 w-full h-full -z-10">
+        <DotGrid
+          dotSize={5}
+          gap={12}
+          baseColor="#271E37"
+          activeColor="#358289"
+          proximity={120}
+          shockRadius={250}
+          shockStrength={5}
+          resistance={750}
+          returnDuration={1.5}
+          className="w-full h-full"
         />
       </div>
 
-      {/* Feature Details Section */}
-      {selectedFeature && (
-        <div className="relative z-10 max-w-4xl mx-auto px-4 pb-20">
-          <div
-            className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10 relative overflow-hidden animate-fade-in"
-            style={{
-              background: `linear-gradient(135deg, ${
-                selectedFeature.color || "#4ECDC4"
-              }10, rgba(255,255,255,0.05))`,
-            }}
-          >
-            {/* Background glow */}
-            <div
-              className="absolute inset-0 opacity-10 blur-3xl"
-              style={{ backgroundColor: selectedFeature.color || "#4ECDC4" }}
-            />
+      {/* Header */}
+      <div className="relative z-50 text-center pt-20 pb-12">
+        <h1 className="text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#54D1DC] to-white mb-4">
+          How CertiMos Works
+        </h1>
+        <p className="text-lg text-gray-300 max-w-2xl mx-auto px-4">
+          A simple, secure, and transparent process for both issuers and
+          recipients.
+        </p>
+      </div>
 
-            {/* Content */}
-            <div className="relative z-10">
-              <div className="flex items-center justify-center mb-6">
-                <div
-                  className="text-3xl mr-2"
-                  style={{
-                    filter: `drop-shadow(0 0 10px ${
-                      selectedFeature.color || "#4ECDC4"
-                    })`,
-                  }}
-                >
-                  {selectedFeature.icon}
-                </div>
-                <h2 className="text-sm font-small text-black">
-                  {selectedFeature.title}
-                </h2>
-              </div>
+      {/* Two-Column Section */}
+      <div className="relative z-50 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto px-6 pb-20">
+        {/* Organizers */}
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8 }}
+          className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-8"
+        >
+          <h2 className="text-2xl font-bold mb-6 text-[#54D1DC]">
+            For Organizers
+          </h2>
+          <ul className="space-y-4">
+            {organizers.map((item, idx) => (
+              <motion.li
+                key={idx}
+                whileHover={{ scale: 1.05 }}
+                onMouseEnter={() => setHoveredCard(idx)}
+                onMouseLeave={() => setHoveredCard(null)}
+                className={`p-4 rounded-lg transition-all ${
+                  hoveredCard === idx ? "bg-white/10" : "bg-transparent"
+                }`}
+              >
+                <h3 className="font-semibold text-lg mb-1">{item.title}</h3>
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  {item.description}
+                </p>
+              </motion.li>
+            ))}
+          </ul>
+        </motion.div>
 
-              <p className="text-xl text-gray-300 text-center mb-8 leading-relaxed">
-                {selectedFeature.description}
-              </p>
-
-              {/* Feature details grid */}
-              {selectedFeature.details && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                  {selectedFeature.details.map((detail, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center p-3 bg-white/5 rounded-lg border border-white/10"
-                    >
-                      <div
-                        className="w-2 h-2 rounded-full mr-3"
-                        style={{
-                          backgroundColor: selectedFeature.color || "#4ECDC4",
-                        }}
-                      />
-                      <span className="text-white text-sm font-medium">
-                        {detail}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+        {/* Participants */}
+        <motion.div
+          initial={{ opacity: 0, x: 50 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8 }}
+          className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-8"
+        >
+          <h2 className="text-2xl font-bold mb-6 text-[#54D1DC]">
+            For Participants
+          </h2>
+          <ul className="space-y-4">
+            {participants.map((item, idx) => (
+              <motion.li
+                key={idx}
+                whileHover={{ scale: 1.05 }}
+                onMouseEnter={() => setHoveredCard(`p-${idx}`)}
+                onMouseLeave={() => setHoveredCard(null)}
+                className={`p-4 rounded-lg transition-all ${
+                  hoveredCard === `p-${idx}` ? "bg-white/10" : "bg-transparent"
+                }`}
+              >
+                <h3 className="font-semibold text-lg mb-1">{item.title}</h3>
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  {item.description}
+                </p>
+              </motion.li>
+            ))}
+          </ul>
+        </motion.div>
+      </div>
     </section>
   );
 }
