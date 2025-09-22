@@ -21,7 +21,7 @@ export default function FeaturesPage() {
       className="min-h-screen select-none bg-black relative overflow-hidden"
     >
       {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 z-40 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-10 w-32 h-32 bg-[#54D1DC] rounded-full opacity-5 blur-3xl animate-pulse"></div>
         <div
           className="absolute bottom-1/4 right-10 w-40 h-40 bg-[#2cf2f9] rounded-full opacity-5 blur-3xl animate-pulse"
@@ -35,7 +35,7 @@ export default function FeaturesPage() {
 
       {/* Header */}
       <div className="relative z-10 text-center pt-20 pb-12">
-        <h1 className="text-6xl md:text-6xl font-bold text-[#43cfdc] mb-4">
+        <h1 className="text-6xl md:text-6xlz-40 font-bold text-[#43cfdc] mb-4">
           Features
         </h1>
         <p className="text-xl text-gray-300 max-w-2xl mx-auto px-4">

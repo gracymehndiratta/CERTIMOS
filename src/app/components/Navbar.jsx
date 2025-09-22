@@ -24,7 +24,7 @@ export default function Navbar() {
   return (
     <>
       {/* Fixed Navbar */}
-      <header className="fixed top-0 left-0 right-0 z-50">
+      <header className="fixed top-0 left-0 right-0 z-50 select-none">
         <div
           className={`transition-all duration-300 ${
             isScrolled ? "pt-2" : "pt-4"
