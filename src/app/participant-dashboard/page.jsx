@@ -206,6 +206,19 @@ export default function ParticipantDashboard() {
   const [shareSuccess, setShareSuccess] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
+  // ⭐ NEW: State for valuation data
+  const [totalPoints, setTotalPoints] = useState(0);
+  const [valueBreakdown, setValueBreakdown] = useState(null);
+
+  // 🎭 NEW: Styles for rarity levels
+  const rarityStyles = {
+    Legendary: 'bg-yellow-500 border-yellow-400 text-black',
+    Epic: 'bg-purple-600 border-purple-500 text-white',
+    Rare: 'bg-blue-600 border-blue-500 text-white',
+    Uncommon: 'bg-green-600 border-green-500 text-white',
+    Common: 'bg-gray-600 border-gray-500 text-white',
+  };
+
   useEffect(() => {
     setIsClient(true);
     checkBackendHealth();
@@ -262,7 +275,12 @@ export default function ParticipantDashboard() {
           const certs = certsData.certificates || [];
           console.log('Certificates with metadata:', certs);
           setCertificates(certs);
-          setCertificateCount(certsData.count || certs.length);
+
+          // ⭐ UPDATED: Set new valuation and breakdown data
+          setCertificateCount(certsData.valueBreakdown?.totalCertificates || certsData.count || certs.length);
+          setTotalPoints(certsData.totalPoints || 0);
+          setValueBreakdown(certsData.valueBreakdown || null);
+
         } else {
           throw new Error(certsData.error || 'Failed to fetch certificates');
         }
@@ -270,6 +288,8 @@ export default function ParticipantDashboard() {
         console.error('Certificates fetch failed:', certificatesResponse.reason);
         setCertificates([]);
         setCertificateCount(0);
+        setTotalPoints(0);
+        setValueBreakdown(null);
       }
 
       // Handle balance response
@@ -381,9 +401,8 @@ export default function ParticipantDashboard() {
   const shareToLinkedIn = (certificate) => {
     const certName = getCertificateName(certificate);
     const eventName = getEventName(certificate);
-    const recipientName = getRecipientName(certificate);
     
-    const shareText = `🎓 I've earned a blockchain certificate: ${certName}${eventName ? ` from ${eventName}` : ''}!\n\nVerified on XDC Network - Token ID: #${certificate.tokenId}\n\n#BlockchainEducation #Certificate #XDC #Achievement`;
+    const shareText = `🎓 I've earned a blockchain certificate: ${certName}${eventName ? ` from ${eventName}` : ''}!\n\nThis ${getCertificateRarity(certificate)} certificate is worth ${getCertificatePoints(certificate)} points and is verified on the XDC Network.\n\nToken ID: #${certificate.tokenId}\n\n#BlockchainEducation #Certificate #XDC #Achievement #NFT`;
     const shareUrl = `https://testnet.xdcscan.com/token/${contractAddress}/${certificate.tokenId}`;
     
     const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
@@ -396,7 +415,7 @@ export default function ParticipantDashboard() {
     const certName = getCertificateName(certificate);
     const eventName = getEventName(certificate);
     
-    const shareText = `🎓 Just earned my blockchain certificate: ${certName}${eventName ? ` from ${eventName}` : ''}! Verified on @XDCFoundation Network. Token #${certificate.tokenId} #BlockchainEducation #Certificate #XDC`;
+    const shareText = `🎓 Just earned my ${getCertificateRarity(certificate)} blockchain certificate: ${certName}${eventName ? ` from ${eventName}` : ''}! Worth ${getCertificatePoints(certificate)} points. Verified on @XDCFoundation Network. Token #${certificate.tokenId} #BlockchainEducation #Certificate #XDC`;
     const shareUrl = `https://testnet.xdcscan.com/token/${contractAddress}/${certificate.tokenId}`;
     
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
@@ -423,6 +442,10 @@ export default function ParticipantDashboard() {
 Certificate: ${certName}
 ${eventName ? `Event: ${eventName}` : ''}
 ${recipientName ? `Recipient: ${recipientName}` : ''}
+
+Rarity: ${getCertificateRarity(certificate)}
+Category: ${getCertificateCategory(certificate)}
+Points: ${getCertificatePoints(certificate)}
 Token ID: #${certificate.tokenId}
 
 Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${certificate.tokenId}
@@ -465,6 +488,12 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
   const getCertificateAttributes = (cert) => {
     return cert.attributes || cert.metadata?.attributes || [];
   };
+
+  // ⭐ NEW: Helpers for valuation data
+  const getCertificatePoints = (cert) => cert.points || 0;
+  const getCertificateRarity = (cert) => cert.rarity || 'Common';
+  const getCertificateCategory = (cert) => cert.category || 'General';
+
 
   const getEventName = (cert) => {
     return cert.event_name || cert.metadata?.event_name || 
@@ -716,6 +745,45 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
           </div>
         )}
 
+        {/* ⭐ NEW: Value Breakdown Section */}
+        {!loading && valueBreakdown && (
+          <section className="mb-10">
+            <h2 className="text-2xl font-bold mb-4">Your Statistics</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Average Points */}
+              <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                <h3 className="text-gray-400 text-sm font-medium mb-1">Average Value</h3>
+                <p className="text-3xl font-bold text-yellow-400">{valueBreakdown.averagePoints.toFixed(0)} PTS</p>
+                <p className="text-gray-500 text-xs">per certificate</p>
+              </div>
+              {/* Rarity Distribution */}
+              <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                 <h3 className="text-gray-400 text-sm font-medium mb-2">Rarity Distribution</h3>
+                 <div className="space-y-2">
+                   {Object.entries(valueBreakdown.rarityDistribution).map(([rarity, count]) => (
+                     <div key={rarity} className="flex justify-between items-center text-sm">
+                       <span className={`${rarityStyles[rarity]} px-2 py-0.5 rounded text-xs font-semibold border`}>{rarity}</span>
+                       <span className="font-bold text-white">{count}</span>
+                     </div>
+                   ))}
+                 </div>
+              </div>
+              {/* Category Distribution */}
+              <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                 <h3 className="text-gray-400 text-sm font-medium mb-2">Category Distribution</h3>
+                 <div className="space-y-2">
+                   {Object.entries(valueBreakdown.categoryDistribution).map(([category, count]) => (
+                     <div key={category} className="flex justify-between items-center text-sm">
+                       <span className="text-gray-300">{category}</span>
+                       <span className="font-bold text-white">{count}</span>
+                     </div>
+                   ))}
+                 </div>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Certificates Section */}
         <section>
           <div className="flex justify-between items-center z-50 mb-8">
@@ -782,7 +850,13 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                       alt={getCertificateName(cert)}
                       className="w-full h-48 object-contain rounded-lg bg-gray-700 transition-transform duration-500 group-hover:scale-105"
                       onError={(e) => {
-                        e.target.src = "/placeholder-certificate.png";
+                        console.log('Image failed to load:', e.target.src);
+                        if (e.target.src !== `${window.location.origin}/placeholder-certificate.png`) {
+                          e.target.src = "/placeholder-certificate.png";
+                        }
+                      }}
+                      onLoad={(e) => {
+                        console.log('Image loaded successfully:', e.target.src);
                       }}
                     />
                     <div
@@ -881,7 +955,7 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                   {/* Footer */}
                   <div className="flex z-50 justify-between items-center animate-fade-in">
                     <span className="text-[#54D1DC] text-sm font-semibold">
-                      Click to view details
+                      View details →
                     </span>
                     <svg
                       className="w-5 h-5 text-gray-400 group-hover:translate-x-1 transition-transform"
@@ -949,9 +1023,15 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                       "/placeholder-certificate.png"
                     }
                     alt={getCertificateName(selectedCertificate)}
-                    className="w-full h-80 object-contain rounded-lg bg-gray-700"
+                    className="w-full h-80 object-cover rounded-lg bg-gray-700"
                     onError={(e) => {
-                      e.target.src = "/placeholder-certificate.png";
+                      console.log('Modal image failed to load:', e.target.src);
+                      if (e.target.src !== `${window.location.origin}/placeholder-certificate.png`) {
+                        e.target.src = "/placeholder-certificate.png";
+                      }
+                    }}
+                    onLoad={(e) => {
+                      console.log('Modal image loaded successfully:', e.target.src);
                     }}
                   />
                 </div>
@@ -1133,8 +1213,8 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                   </div>
                 </div>
               </div>
-
-              {/* Action Buttons */}
+              
+              {/* ✅ ACTION BUTTONS RESTORED HERE */}
               <div className="mt-6 pt-6 border-t border-gray-700">
                 <div className="flex flex-col sm:flex-row gap-4">
                   {/* View Contract Button */}
@@ -1245,6 +1325,7 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                   )}
                 </div>
               </div>
+
             </div>
           </div>
         </div>
