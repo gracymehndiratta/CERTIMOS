@@ -11,30 +11,48 @@ export default function LandingPage() {
   const [showModal, setShowModal] = useState(false);
 
   const handleConnectWallet = async () => {
-    if (typeof window.ethereum !== "undefined") {
+  // Clear previous connection
+  localStorage.removeItem("walletAddress");
+  
+  if (typeof window.ethereum !== "undefined") {
+    try {
+      // First disconnect any existing connections
       try {
-        const accounts = await window.ethereum.request({
-          method: "eth_requestAccounts",
+        await window.ethereum.request({
+          method: "wallet_revokePermissions",
+          params: [{ eth_accounts: {} }]
         });
+      } catch (revokeError) {
+        // If revoke fails, continue anyway
+        console.log("Could not revoke permissions:", revokeError);
+      }
 
-        const walletAddress = accounts[0];
-        console.log("Connected wallet:", walletAddress);
+      // Now request accounts - this will show the popup
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      });
 
-   
-        localStorage.setItem("walletAddress", walletAddress);
+      const walletAddress = accounts[0];
+      console.log("Connected wallet:", walletAddress);
 
-        // Redirect to dashboard
-        router.push("/participant-dashboard"); // change this route as needed
-      } catch (err) {
-        console.error(err);
+      localStorage.setItem("walletAddress", walletAddress);
+
+      // Redirect to dashboard
+      router.push("/participant-dashboard");
+    } catch (err) {
+      console.error(err);
+      if (err.code === 4001) {
+        alert("Connection rejected by user");
+      } else {
         alert("Wallet connection failed");
       }
-    } else {
-      alert(
-        "MetaMask is not installed! Please install it from https://metamask.io/"
-      );
     }
-  };
+  } else {
+    alert(
+      "MetaMask is not installed! Please install it from https://metamask.io/"
+    );
+  }
+};
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
