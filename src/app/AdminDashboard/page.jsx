@@ -13,6 +13,7 @@ import {
   FaTimes
 } from "react-icons/fa";
 import StarBorder from "../components/ui/StarBorder";
+import FloatingPixels from "../components/ui/FloatingPixels";
 
 export default function AdminDashboard() {
   
@@ -239,9 +240,10 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-black text-white px-4 md:px-8 py-12">
+      <FloatingPixels />
       <header className="flex justify-between items-center mb-12 pb-6">
         <div className="flex items-center">
-          <h1 className="text-4xl font-extrabold text-[#2cf2f9] animate-fade-in">
+          <h1 className="text-4xl font-extrabold text-white animate-fade-in">
             Admin Dashboard
           </h1>
         </div>
@@ -263,7 +265,7 @@ export default function AdminDashboard() {
           <div className="p-8 md:p-12 flex flex-col items-center">
             {/* Current Contracts Section */}
             <div className="mb-12">
-              <h2 className="text-2xl font-bold mb-6 text-white">Deployed Contracts</h2>
+              <h2 className="text-3xl font-bold mb-6 text-white">Deployed Contracts</h2>
               {contracts.length > 0 ? (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {contracts.map((contract, index) => (
@@ -293,9 +295,8 @@ export default function AdminDashboard() {
                 </div>
               )}
             </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-4 mb-8">
+            
+            <div className="w-full flex flex-wrap gap-4 mb-8 justify-center">
               <button
                 onClick={() => setShowCreateContract(true)}
                 className="flex items-center gap-2 bg-white text-black px-6 py-3 rounded-lg font-bold hover:bg-gray-200 transition-colors"
@@ -360,7 +361,8 @@ export default function AdminDashboard() {
         {showCreateContract && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-black p-8 rounded-lg max-w-md w-full border border-gray-600">
-              <div className="flex justify-between items-center mb-6">
+              <FloatingPixels />
+              <div className="relative z-10 flex justify-between items-center mb-6">
                 <h3 className="text-2xl font-bold text-white">Deploy New Contract</h3>
                 <button
                   onClick={() => setShowCreateContract(false)}
@@ -370,7 +372,7 @@ export default function AdminDashboard() {
                 </button>
               </div>
               
-              <form onSubmit={deployContract} className="space-y-6">
+              <form onSubmit={deployContract} className="relative z-10 space-y-6">
                 <input
                   type="text"
                   name="contractName"
