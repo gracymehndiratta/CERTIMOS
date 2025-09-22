@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
+import DotGrid from "../components/ui/DotGrid";
 
 // Backend API Configuration - Try multiple possible ports
 const POSSIBLE_BACKEND_URLS = [
@@ -575,63 +576,132 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
+      <div className="fixed top-0 left-0 w-full h-full z-0">
+        <DotGrid
+          dotSize={10}
+          gap={12}
+          baseColor="#271E37"
+          activeColor="#54D1DC"
+          proximity={120}
+          shockRadius={250}
+          shockStrength={5}
+          resistance={750}
+          returnDuration={1.5}
+          className="w-full h-full"
+        />
+      </div>
+
       {/* Header */}
       <header className="border-b border-gray-800 bg-black/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-[#54D1DC] to-blue-400 bg-clip-text text-transparent">
+              {/* Gradient animated heading */}
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-[#54D1DC] via-blue-400 to-[#54D1DC] bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-x">
                 Certificate Dashboard
               </h1>
-              <p className="text-gray-400 text-sm mt-1">
+
+              {/* Wallet with fade + slide in */}
+              <p className="text-gray-400 text-sm mt-1 animate-fade-in">
                 Wallet: {wallet.slice(0, 6)}...{wallet.slice(-4)}
               </p>
             </div>
-            
-            <div className="flex items-center gap-4">
+
+            <div className="flex items-center gap-6">
               {/* Backend Status */}
+
               {backendStatus && (
-                <div className="hidden md:flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${
-                    backendStatus.status === 'OK' ? 'bg-green-400' : 'bg-red-400'
-                  }`}></div>
-                  <span className="text-sm text-gray-400">
-                    {backendStatus.status === 'OK' ? 'Backend Online' : 'Backend Offline'}
+                <div className="flex items-center gap-3 animate-bounce-in">
+                  {/* Ripple + Glow Dot */}
+                  <div className="relative">
+                    <div
+                      className={`absolute inset-0 rounded-full opacity-70 animate-ripple ${
+                        backendStatus.status === "OK"
+                          ? "bg-green-400"
+                          : "bg-red-400"
+                      }`}
+                    ></div>
+                    <div
+                      className={`w-4 h-4 rounded-full animate-glow ${
+                        backendStatus.status === "OK"
+                          ? "bg-gradient-to-r from-green-400 to-emerald-500"
+                          : "bg-gradient-to-r from-red-400 to-pink-500"
+                      }`}
+                    ></div>
+                  </div>
+
+                  {/* Status text with shimmer */}
+                  <span
+                    className={`text-sm font-semibold bg-clip-text text-transparent animate-shimmer ${
+                      backendStatus.status === "OK"
+                        ? "bg-gradient-to-r from-green-300 via-emerald-400 to-green-300"
+                        : "bg-gradient-to-r from-red-300 via-pink-400 to-red-300"
+                    }`}
+                  >
+                    {backendStatus.status === "OK"
+                      ? " Backend Online "
+                      : "Backend Offline "}
                   </span>
                 </div>
               )}
-              
+
               {/* Share Success Notification */}
               {shareSuccess && (
                 <div className="flex items-center gap-2 bg-green-600 px-3 py-1 rounded-lg">
-                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  <svg
+                    className="w-4 h-4 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
-                  <span className="text-sm text-white">Copied!</span>
+                  <span className="text-sm text-white">
+                    Copied to clipboard!
+                  </span>
                 </div>
               )}
-              
+
+              {/* Loading indicator only shows during initial load */}
+              {loading && (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-[#54D1DC] border-t-transparent rounded-full animate-spin"></div>
+                  <span className="text-sm text-gray-400">
+                    Loading certificates...
+                  </span>
+                </div>
+              )}
+
               {/* Balance Display */}
-              <div className="bg-gray-800 rounded-lg px-4 py-2">
+              <div className="bg-transparent rounded-lg px-4 py-2">
                 <div className="text-sm text-gray-400">XDC Balance</div>
                 <div className="text-lg font-bold text-[#54D1DC]">
-                  {balance ? `${parseFloat(balance).toFixed(4)} XDC` : "Loading..."}
+                  {balance
+                    ? `${parseFloat(balance).toFixed(4)} XDC`
+                    : "Loading..."}
                 </div>
               </div>
 
               {/* Certificate Count */}
-              <div className="bg-gray-800 rounded-lg px-4 py-2">
-                <div className="text-sm text-gray-400">Certificates</div>
-                <div className="text-lg font-bold text-green-400">
-                  {certificateCount}
-                </div>
-              </div>
+              <div className="relative group bg-transparent rounded-2xl px-6 py-4 overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105">
+                {/* Animated glowing border */}
+                <div className="absolute inset-0 text-lg  opacity-50 blur-xl "></div>
 
-              {/* ⭐ NEW: Total Points Display */}
-              <div className="bg-gray-800 rounded-lg px-4 py-2">
-                <div className="text-sm text-gray-400">Total Value</div>
-                <div className="text-lg font-bold text-yellow-400">
-                  {loading ? '...' : `${totalPoints.toLocaleString()} PTS`}
+                <div className="relative z-10">
+                  {/* Shimmer title */}
+                  <div className="text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300 animate-shimmer">
+                    Certificates
+                  </div>
+
+                  {/* Animated number */}
+                  <div className="text-2xl font-extrabold text-green-400 animate-glow animate-bounce-in">
+                    {certificateCount}
+                  </div>
                 </div>
               </div>
 
@@ -642,8 +712,18 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                 className="bg-gray-700 hover:bg-gray-600 p-2 rounded-lg transition-colors disabled:opacity-50"
                 title="Refresh Data"
               >
-                <svg className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                <svg
+                  className={`w-5 h-5 ${loading ? "animate-spin" : ""}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
                 </svg>
               </button>
             </div>
@@ -651,7 +731,7 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl z-50 mx-auto px-6 py-8">
         {/* Error Display */}
         {error && (
           <div className="mb-8 bg-red-900/50 border border-red-500 rounded-lg p-4">
@@ -706,53 +786,69 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
 
         {/* Certificates Section */}
         <section>
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl font-bold">Your Certificates</h2>
+          <div className="flex justify-between items-center z-50 mb-8">
+            <h2 className="text-2xl z-50 font-bold bg-gradient-to-r from-[#54D1DC] to-blue-400 bg-clip-text text-transparent animate-gradient-x">
+              Your Certificates
+            </h2>
             {!loading && certificates.length > 0 && (
-              <div className="text-gray-400">
-                {certificates.length} certificate{certificates.length !== 1 ? 's' : ''} found
+              <div className="text-gray-400 animate-fade-in">
+                {certificates.length} certificate
+                {certificates.length !== 1 ? "s" : ""} found
               </div>
             )}
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className=" z-50 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="bg-gray-800 rounded-xl p-6 animate-pulse">
-                  <div className="bg-gray-700 h-48 rounded-lg mb-4"></div>
-                  <div className="bg-gray-700 h-4 rounded mb-2"></div>
-                  <div className="bg-gray-700 h-4 rounded w-3/4 mb-2"></div>
-                  <div className="bg-gray-700 h-4 rounded w-1/2"></div>
+                <div
+                  key={i}
+                  className="bg-white/20 rounded-xl p-6 overflow-hidden relative"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-shimmer"></div>
+                  <div className="bg-gray-700 h-48 rounded-lg mb-4 relative z-10"></div>
+                  <div className="bg-gray-700 h-4 rounded mb-2 relative z-10"></div>
+                  <div className="bg-gray-700 h-4 rounded w-3/4 mb-2 relative z-10"></div>
+                  <div className="bg-gray-700 h-4 rounded w-1/2 relative z-10"></div>
                 </div>
               ))}
             </div>
           ) : certificates.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="text-6xl mb-4">📜</div>
-              <h3 className="text-xl font-semibold mb-2">No Certificates Found</h3>
+            <div className="text-center py-16 animate-fade-in">
+              <div className="text-6xl mb-4 animate-bounce">📜</div>
+              <h3 className="text-xl font-semibold mb-2">
+                No Certificates Found
+              </h3>
               <p className="text-gray-400 mb-6">
                 You don't have any certificates in this wallet yet.
               </p>
               <button
                 onClick={refreshData}
-                className="bg-[#54D1DC] hover:bg-[#3fb8c4] px-6 py-3 rounded-lg font-semibold transition-colors"
+                className="bg-[#54D1DC] hover:bg-[#3fb8c4] px-6 py-3 rounded-lg font-semibold transition-all animate-pulse-glow"
               >
                 Refresh
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {certificates.map((cert) => (
+            <div className="z-50 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {certificates.map((cert, idx) => (
                 <div
                   key={cert.tokenId}
                   onClick={() => handleCertificateClick(cert)}
-                  className="bg-gray-800 rounded-xl shadow-lg p-6 hover:bg-gray-750 transition-all cursor-pointer transform hover:scale-105 border border-gray-700 hover:border-[#54D1DC]/50 flex flex-col"
+                  style={{ animationDelay: `${idx * 150}ms` }}
+                  className="bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-700 cursor-pointer 
+                     transform transition-all duration-500 animate-fade-up 
+                     hover:scale-105 hover:rotate-1 hover:shadow-2xl hover:border-[#54D1DC]/60"
                 >
-                  <div className="relative mb-4">
+                  {/* Certificate Image */}
+                  <div className="z-50 relative mb-4">
                     <img
-                      src={getCertificateImage(cert) || "/placeholder-certificate.png"}
+                      src={
+                        resolveIPFS(getCertificateImage(cert)) ||
+                        "/placeholder-certificate.png"
+                      }
                       alt={getCertificateName(cert)}
-                      className="w-full h-48 object-cover rounded-lg bg-gray-700"
+                      className="w-full h-48 object-contain rounded-lg bg-gray-700 transition-transform duration-500 group-hover:scale-105"
                       onError={(e) => {
                         console.log('Image failed to load:', e.target.src);
                         if (e.target.src !== `${window.location.origin}/placeholder-certificate.png`) {
@@ -763,69 +859,117 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                         console.log('Image loaded successfully:', e.target.src);
                       }}
                     />
-                    <div className="absolute top-2 right-2 bg-[#54D1DC] text-black px-2 py-1 rounded text-xs font-bold">
+                    <div
+                      className="absolute z-50 top-2 right-2 px-2 py-1 rounded text-xs font-bold 
+                            bg-[#54D1DC] text-black"
+                    >
                       #{cert.tokenId}
                     </div>
-                    {/* ⭐ UPDATED: Rarity Badge on Card */}
-                    <div className={`absolute top-2 left-2 px-2 py-1 rounded text-xs font-bold border ${rarityStyles[getCertificateRarity(cert)]}`}>
-                      {getCertificateRarity(cert)}
-                    </div>
+                    {getCertificateLevel(cert) && (
+                      <div
+                        className="absolute top-2 left-2 px-2 py-1 rounded text-xs font-bold 
+                              bg-purple-600 text-white"
+                      >
+                        {getCertificateLevel(cert)}
+                      </div>
+                    )}
                   </div>
-                  
-                  <div className="flex-grow">
-                    <h3 className="text-xl font-bold mb-2 text-white">
-                      {getCertificateName(cert)}
-                    </h3>
 
-                    {/* Event Name & Category */}
-                    <div className="grid grid-cols-2 gap-4 mb-3">
-                      {getEventName(cert) && (
-                        <div>
-                          <span className="text-xs text-gray-400 uppercase tracking-wide">Event</span>
-                          <p className="text-[#54D1DC] font-semibold text-sm truncate">
-                            {getEventName(cert)}
-                          </p>
-                        </div>
-                      )}
-                       {/* ⭐ NEW: Category on Card */}
-                      <div>
-                        <span className="text-xs text-gray-400 uppercase tracking-wide">Category</span>
-                        <p className="text-white font-medium text-sm">
-                          {getCertificateCategory(cert)}
-                        </p>
+                  {/* Title */}
+                  <h3 className="text-xl font-bold mb-2 text-white">
+                    {getCertificateName(cert)}
+                  </h3>
+
+                  {/* Event */}
+                  {getEventName(cert) && (
+                    <div className="mb-2 animate-pop-in">
+                      <span className="text-xs text-gray-400 uppercase tracking-wide">
+                        Event
+                      </span>
+                      <p className="text-[#54D1DC] font-semibold text-sm">
+                        {getEventName(cert)}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Recipient */}
+                  {getRecipientName(cert) && (
+                    <div className="mb-2 animate-pop-in">
+                      <span className="text-xs text-gray-400 uppercase tracking-wide">
+                        Recipient
+                      </span>
+                      <p className="text-white font-medium text-sm">
+                        {getRecipientName(cert)}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Date */}
+                  {getDateIssued(cert) && (
+                    <div className="mb-3 animate-pop-in">
+                      <span className="text-xs text-gray-400 uppercase tracking-wide">
+                        Issued
+                      </span>
+                      <p className="text-gray-300 text-sm">
+                        {formatDate(getDateIssued(cert))}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Skills */}
+                  {getSkills(cert).length > 0 && (
+                    <div className="mb-3">
+                      <span className="text-xs text-gray-400 uppercase tracking-wide block mb-1">
+                        Skills
+                      </span>
+                      <div className="flex flex-wrap gap-1">
+                        {getSkills(cert)
+                          .slice(0, 3)
+                          .map((skill, index) => (
+                            <span
+                              key={index}
+                              className="bg-blue-600 text-white text-xs px-2 py-1 rounded animate-pop-in"
+                              style={{ animationDelay: `${index * 120}ms` }}
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                        {getSkills(cert).length > 3 && (
+                          <span className="bg-gray-700 text-xs px-2 py-1 rounded animate-pop-in">
+                            +{getSkills(cert).length - 3} more
+                          </span>
+                        )}
                       </div>
                     </div>
+                  )}
 
-                    {/* Recipient & Date */}
-                     <div className="grid grid-cols-2 gap-4 mb-3">
-                      {getRecipientName(cert) && (
-                          <div>
-                            <span className="text-xs text-gray-400 uppercase tracking-wide">Recipient</span>
-                            <p className="text-white font-medium text-sm truncate">
-                              {getRecipientName(cert)}
-                            </p>
-                          </div>
-                      )}
-                      {getDateIssued(cert) && (
-                          <div>
-                            <span className="text-xs text-gray-400 uppercase tracking-wide">Issued</span>
-                            <p className="text-gray-300 text-sm">
-                              {formatDate(getDateIssued(cert))}
-                            </p>
-                          </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Footer with Points and action text */}
-                  <div className="mt-auto pt-4 border-t border-gray-700 flex justify-between items-center">
-                    {/* ⭐ NEW: Points on Card */}
-                    <div className="font-bold text-yellow-400 text-lg">
-                      {getCertificatePoints(cert).toLocaleString()} PTS
-                    </div>
+                  {/* Fallback Description */}
+                  {!getEventName(cert) &&
+                    !getRecipientName(cert) &&
+                    getCertificateDescription(cert) && (
+                      <p className="text-gray-400 mb-3 text-sm line-clamp-2 animate-fade-in">
+                        {getCertificateDescription(cert)}
+                      </p>
+                    )}
+
+                  {/* Footer */}
+                  <div className="flex z-50 justify-between items-center animate-fade-in">
                     <span className="text-[#54D1DC] text-sm font-semibold">
                       View details →
                     </span>
+                    <svg
+                      className="w-5 h-5 text-gray-400 group-hover:translate-x-1 transition-transform"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
                   </div>
                 </div>
               ))}
@@ -836,35 +980,48 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
 
       {/* Enhanced Certificate Detail Modal */}
       {selectedCertificate && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed  inset-0 bg-black/80 flex items-center justify-center p-4 ">
+          <div className="bg-gray-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-[#54D1DC]/30 shadow-[0_0_20px_#54D1DC] animate-fadeIn scale-95 hover:scale-100 transition-all duration-500">
             <div className="p-6">
-              <div className="flex justify-between items-start mb-6">
+              <div className="flex justify-between items-start mb-6 animate-slideDown">
                 <div>
-                  <h3 className="text-2xl font-bold text-white mb-2">
+                  <h3 className="text-2xl font-bold text-white mb-2 bg-gradient-to-r from-[#54D1DC] to-purple-500 bg-clip-text  animate-gradient">
                     {getCertificateName(selectedCertificate)}
                   </h3>
                   {getEventName(selectedCertificate) && (
-                    <p className="text-[#54D1DC] text-lg font-semibold">
+                    <p className="text-[#54D1DC] text-lg font-semibold animate-pulse">
                       {getEventName(selectedCertificate)}
                     </p>
                   )}
                 </div>
                 <button
                   onClick={closeCertificateModal}
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-gray-400 hover:text-white transition-all transform hover:rotate-90 hover:scale-125 duration-300"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-6 h-6 animate-spin-slow hover:animate-none"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 z-50 lg:grid-cols-2 gap-6">
                 {/* Certificate Image */}
                 <div>
                   <img
-                    src={getCertificateImage(selectedCertificate) || "/placeholder-certificate.png"}
+                    src={
+                      resolveIPFS(getCertificateImage(selectedCertificate)) ||
+                      "/placeholder-certificate.png"
+                    }
                     alt={getCertificateName(selectedCertificate)}
                     className="w-full h-80 object-cover rounded-lg bg-gray-700"
                     onError={(e) => {
@@ -880,10 +1037,10 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                 </div>
 
                 {/* Certificate Details */}
-                <div className="space-y-4">
+                <div className="z-50 space-y-4">
                   {/* Recipient Information */}
                   {getRecipientName(selectedCertificate) && (
-                    <div className="bg-gray-700 p-4 rounded-lg">
+                    <div className="bg-gray-700 z-50 p-4 rounded-lg">
                       <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-wide mb-2">
                         Certificate Holder
                       </h4>
@@ -893,31 +1050,30 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                     </div>
                   )}
 
-                  {/* ⭐ UPDATED: Valuation Details in Modal */}
-                   <div className="grid grid-cols-3 gap-4">
-                      <div className="bg-yellow-600/20 border border-yellow-600 p-3 rounded-lg text-center">
-                        <div className="text-xs text-yellow-300 uppercase tracking-wide">Points</div>
-                        <p className="text-yellow-100 font-bold text-lg">{getCertificatePoints(selectedCertificate).toLocaleString()}</p>
+                  {/* Certificate Level and Date */}
+                  <div className="grid grid-cols-2 z-50 gap-4">
+                    {getCertificateLevel(selectedCertificate) && (
+                      <div className="bg-purple-600/20 border border-purple-600 p-3 rounded-lg">
+                        <div className="text-xs text-purple-300 uppercase tracking-wide">
+                          Level
+                        </div>
+                        <p className="text-purple-100 font-bold">
+                          {getCertificateLevel(selectedCertificate)}
+                        </p>
                       </div>
-                       <div className={`border p-3 rounded-lg text-center ${rarityStyles[getCertificateRarity(selectedCertificate)]}`}>
-                        <div className="text-xs uppercase tracking-wide opacity-80">Rarity</div>
-                        <p className="font-bold">{getCertificateRarity(selectedCertificate)}</p>
-                      </div>
-                      <div className="bg-gray-600/20 border border-gray-600 p-3 rounded-lg text-center">
-                        <div className="text-xs text-gray-300 uppercase tracking-wide">Category</div>
-                        <p className="text-gray-100 font-semibold">{getCertificateCategory(selectedCertificate)}</p>
-                      </div>
-                  </div>
+                    )}
 
-                  {/* Date Issued */}
-                  {getDateIssued(selectedCertificate) && (
-                    <div className="bg-blue-600/20 border border-blue-600 p-3 rounded-lg">
-                      <div className="text-xs text-blue-300 uppercase tracking-wide">Date Issued</div>
-                      <p className="text-blue-100 font-semibold">
-                        {formatDate(getDateIssued(selectedCertificate))}
-                      </p>
-                    </div>
-                  )}
+                    {getDateIssued(selectedCertificate) && (
+                      <div className="bg-blue-600/20 border border-blue-600 p-3 rounded-lg">
+                        <div className="text-xs text-blue-300 uppercase tracking-wide">
+                          Date Issued
+                        </div>
+                        <p className="text-blue-100 font-semibold">
+                          {formatDate(getDateIssued(selectedCertificate))}
+                        </p>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Skills Section */}
                   {getSkills(selectedCertificate).length > 0 && (
@@ -927,7 +1083,10 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {getSkills(selectedCertificate).map((skill, index) => (
-                          <span key={index} className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                          <span
+                            key={index}
+                            className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium"
+                          >
                             {skill}
                           </span>
                         ))}
@@ -951,11 +1110,15 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
 
               {/* Technical Details */}
               <div className="mt-6 pt-6 border-t border-gray-700">
-                <h4 className="text-lg font-semibold text-white mb-4">Technical Details</h4>
+                <h4 className="text-lg font-semibold text-white mb-4">
+                  Technical Details
+                </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm text-gray-400">Token ID</label>
-                    <p className="text-white font-mono">#{selectedCertificate.tokenId}</p>
+                    <p className="text-white font-mono">
+                      #{selectedCertificate.tokenId}
+                    </p>
                   </div>
 
                   <div>
@@ -964,18 +1127,26 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                   </div>
 
                   <div>
-                    <label className="text-sm text-gray-400">Owner Address</label>
-                    <p className="text-white font-mono text-sm break-all">{selectedCertificate.owner}</p>
+                    <label className="text-sm text-gray-400">
+                      Owner Address
+                    </label>
+                    <p className="text-white font-mono text-sm break-all">
+                      {selectedCertificate.owner}
+                    </p>
                   </div>
 
                   <div>
-                    <label className="text-sm text-gray-400">Contract Address</label>
+                    <label className="text-sm text-gray-400">
+                      Contract Address
+                    </label>
                     <div className="flex items-center gap-2">
                       <p className="text-white font-mono text-sm break-all">
                         {contractAddress}
                       </p>
                       <button
-                        onClick={() => navigator.clipboard?.writeText(contractAddress)}
+                        onClick={() =>
+                          navigator.clipboard?.writeText(contractAddress)
+                        }
                         className="text-[#54D1DC] hover:text-[#3fb8c4] text-xs"
                         title="Copy address"
                       >
@@ -987,12 +1158,16 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
 
                 {selectedCertificate.tokenURI && (
                   <div className="mt-4">
-                    <label className="text-sm text-gray-400">Metadata URI</label>
+                    <label className="text-sm text-gray-400">
+                      Metadata URI
+                    </label>
                     <div className="flex items-center gap-2">
-                      <p className="text-white font-mono text-sm truncate">{selectedCertificate.tokenURI}</p>
-                      <a 
-                        href={resolveIPFS(selectedCertificate.tokenURI)} 
-                        target="_blank" 
+                      <p className="text-white font-mono text-sm truncate">
+                        {selectedCertificate.tokenURI}
+                      </p>
+                      <a
+                        href={resolveIPFS(selectedCertificate.tokenURI)}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-[#54D1DC] hover:text-[#3fb8c4] text-sm"
                       >
@@ -1005,24 +1180,36 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                 {/* All Attributes */}
                 {getCertificateAttributes(selectedCertificate).length > 0 && (
                   <div className="mt-4">
-                    <label className="text-sm text-gray-400 mb-2 block">All Attributes</label>
+                    <label className="text-sm text-gray-400 mb-2 block">
+                      All Attributes
+                    </label>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                      {getCertificateAttributes(selectedCertificate).map((attr, index) => (
-                        <div key={index} className="bg-gray-700 p-2 rounded">
-                          <div className="text-xs text-gray-400">{attr.trait_type}</div>
-                          <div className="text-white text-sm">{attr.value}</div>
-                        </div>
-                      ))}
+                      {getCertificateAttributes(selectedCertificate).map(
+                        (attr, index) => (
+                          <div key={index} className="bg-gray-700 p-2 rounded">
+                            <div className="text-xs text-gray-400">
+                              {attr.trait_type}
+                            </div>
+                            <div className="text-white text-sm">
+                              {attr.value}
+                            </div>
+                          </div>
+                        )
+                      )}
                     </div>
                   </div>
                 )}
 
                 {/* Verification Status */}
                 <div className="mt-4">
-                  <label className="text-sm text-gray-400">Verification Status</label>
+                  <label className="text-sm text-gray-400">
+                    Verification Status
+                  </label>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                    <p className="text-green-400 font-semibold">Verified on Blockchain</p>
+                    <p className="text-green-400 font-semibold">
+                      Verified on Blockchain
+                    </p>
                   </div>
                 </div>
               </div>
@@ -1035,30 +1222,62 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                     onClick={handleViewContract}
                     className="flex-1 bg-[#54D1DC] hover:bg-[#3fb8c4] text-black px-4 py-3 rounded-lg font-semibold text-center transition-colors flex items-center justify-center gap-2"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      />
                     </svg>
                     View Contract on XDCScan
                   </button>
-                  
+
                   {/* View Token Details Button */}
                   <button
-                    onClick={() => handleViewTokenDetails(selectedCertificate.tokenId)}
+                    onClick={() =>
+                      handleViewTokenDetails(selectedCertificate.tokenId)
+                    }
                     className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-semibold text-center transition-colors flex items-center justify-center gap-2"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
                     </svg>
                     View Token Details
                   </button>
-                  
+
                   {/* Share Certificate Button */}
                   <button
                     onClick={() => handleShareCertificate(selectedCertificate)}
                     className="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-3 rounded-lg font-semibold text-center transition-colors flex items-center justify-center gap-2"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+                      />
                     </svg>
                     Share Certificate
                   </button>
@@ -1077,10 +1296,11 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                   >
                     Copy Token URL
                   </button>
-                  
+
                   <button
                     onClick={() => {
-                      const contractUrl = 'https://testnet.xdcscan.com/address/0x9b40c3c0656434fd89bC50671a29d1814EDA8079';
+                      const contractUrl =
+                        "https://testnet.xdcscan.com/address/0x9b40c3c0656434fd89bC50671a29d1814EDA8079";
                       navigator.clipboard?.writeText(contractUrl);
                       setShareSuccess(true);
                       setTimeout(() => setShareSuccess(false), 2000);
@@ -1089,12 +1309,14 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                   >
                     Copy Contract URL
                   </button>
-                  
+
                   {selectedCertificate.tokenURI && (
                     <button
                       onClick={() => {
-                        const ipfsUrl = resolveIPFS(selectedCertificate.tokenURI);
-                        window.open(ipfsUrl, '_blank', 'noopener,noreferrer');
+                        const ipfsUrl = resolveIPFS(
+                          selectedCertificate.tokenURI
+                        );
+                        window.open(ipfsUrl, "_blank", "noopener,noreferrer");
                       }}
                       className="text-sm bg-purple-600 hover:bg-purple-500 text-white px-3 py-1 rounded transition-colors"
                     >
@@ -1114,13 +1336,25 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
           <div className="bg-gray-800 rounded-2xl max-w-md w-full p-6">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-white">Share Certificate</h3>
+              <h3 className="text-xl font-bold text-white">
+                Share Certificate
+              </h3>
               <button
                 onClick={closeShareModal}
                 className="text-gray-400 hover:text-white transition-colors"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -1128,16 +1362,17 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
             <div className="space-y-4">
               {/* Certificate Preview */}
               <div className="bg-gray-700 p-4 rounded-lg text-center">
-                <h4 className="text-white font-semibold">{getCertificateName(selectedCertificate)}</h4>
+                <h4 className="text-white font-semibold">
+                  {getCertificateName(selectedCertificate)}
+                </h4>
                 {getEventName(selectedCertificate) && (
-                  <p className="text-[#54D1DC] text-sm">{getEventName(selectedCertificate)}</p>
+                  <p className="text-[#54D1DC] text-sm">
+                    {getEventName(selectedCertificate)}
+                  </p>
                 )}
-                 <div className="mt-2 flex justify-center items-center gap-4 text-xs">
-                    <span className={`px-2 py-0.5 rounded font-semibold border ${rarityStyles[getCertificateRarity(selectedCertificate)]}`}>
-                        {getCertificateRarity(selectedCertificate)}
-                    </span>
-                    <span className="text-yellow-400 font-bold">{getCertificatePoints(selectedCertificate)} PTS</span>
-                </div>
+                <p className="text-gray-300 text-xs">
+                  Token #{selectedCertificate.tokenId}
+                </p>
               </div>
 
               {/* Share Options */}
@@ -1146,8 +1381,12 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                   onClick={() => shareToLinkedIn(selectedCertificate)}
                   className="w-full bg-[#0077B5] hover:bg-[#005885] text-white px-4 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-3"
                 >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
                   </svg>
                   Share on LinkedIn
                 </button>
@@ -1156,18 +1395,46 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                   onClick={() => shareToTwitter(selectedCertificate)}
                   className="w-full bg-[#1DA1F2] hover:bg-[#0d8bd9] text-white px-4 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-3"
                 >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
                   </svg>
                   Share on Twitter
                 </button>
-                
+
+                <button
+                  onClick={() => shareToFacebook(selectedCertificate)}
+                  className="w-full bg-[#4267B2] hover:bg-[#365899] text-white px-4 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-3"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                  </svg>
+                  Share on Facebook
+                </button>
+
                 <button
                   onClick={() => copyToClipboard(selectedCertificate)}
                   className="w-full bg-gray-700 hover:bg-gray-600 text-white px-4 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-3"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    />
                   </svg>
                   Copy to Clipboard
                 </button>
