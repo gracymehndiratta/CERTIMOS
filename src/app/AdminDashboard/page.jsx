@@ -15,10 +15,83 @@ import {
 } from "react-icons/fa";
 import StarBorder from "../components/ui/StarBorder";
 import FloatingPixels from "../components/ui/FloatingPixels";
+import { ethers } from "ethers";
+
+// Backend API Configuration
+const POSSIBLE_BACKEND_URLS = [
+  "http://localhost:5000",
+  "http://localhost:3001",
+  "http://127.0.0.1:5000"
+];
+
+let API_BASE_URL = "http://localhost:5000/api";
+let HEALTH_URL = "http://localhost:5000/health";
+
+const apiService = {
+  async findWorkingBackend() {
+    for (const baseUrl of POSSIBLE_BACKEND_URLS) {
+      try {
+        const response = await fetch(`${baseUrl}/health`, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+        });
+        if (response.ok) {
+          API_BASE_URL = `${baseUrl}/api`;
+          HEALTH_URL = `${baseUrl}/health`;
+          return await response.json();
+        }
+      } catch (error) {
+        console.log(`Backend not available at ${baseUrl}:`, error.message);
+        continue;
+      }
+    }
+    throw new Error('No backend server found. Please start your backend server.');
+  },
+
+  async getCertificates() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/certificates/count`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch certificate count: ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Certificate count fetch error:', error);
+      throw error;
+    }
+  },
+
+  async getBalance(walletAddress) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/wallet/${walletAddress}/balance`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch balance: ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Balance fetch error:', error);
+      throw error;
+    }
+  },
+};
 
 export default function AdminDashboard() {
-  
+
   const router = useRouter();
+
+  // New state variables for the navbar
+  const [wallet, setWallet] = useState('Admin Wallet'); // Using a placeholder for admin
+  const [balance, setBalance] = useState(null);
+  const [certificateCount, setCertificateCount] = useState(0);
+  const [backendStatus, setBackendStatus] = useState(null);
+  const [shareSuccess, setShareSuccess] = useState(false); // Can be used for copy actions
+  const [loadingDashboard, setLoadingDashboard] = useState(true);
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
@@ -35,8 +108,6 @@ export default function AdminDashboard() {
     contractName: "",
     networkName: "apothem",
   });
-
-  
 
   // Certificate minting form
   const [mintForm, setMintForm] = useState({
@@ -60,20 +131,70 @@ export default function AdminDashboard() {
   // Load data on component mount
   useEffect(() => {
     fetchContracts();
+    checkBackendHealth();
+    fetchDashboardData();
   }, []);
+
+  const checkBackendHealth = async () => {
+    try {
+      const health = await apiService.findWorkingBackend();
+      setBackendStatus(health);
+    } catch (err) {
+      setBackendStatus({ status: "ERROR", message: err.message });
+    }
+  };
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoadingDashboard(true);
+      // Fetch certificates count
+      const certsResponse = await apiService.getCertificates();
+      if (certsResponse.success) {
+        setCertificateCount(certsResponse.count);
+      } else {
+        setCertificateCount(0);
+      }
+
+      // We'll use a placeholder for admin wallet balance,
+      // or fetch the balance of the first deployed contract owner
+      const adminWalletAddress = contracts.length > 0 ? (contracts[0].owner || contracts[0].deployer) : '0xPlaceholder';
+      if (adminWalletAddress !== '0xPlaceholder') {
+        const balanceResponse = await apiService.getBalance(adminWalletAddress);
+        if (balanceResponse.success) {
+          setBalance(balanceResponse.balance.formatted);
+        } else {
+          setBalance('N/A');
+        }
+      } else {
+        setBalance('N/A');
+      }
+
+    } catch (err) {
+      console.error("Error fetching dashboard data:", err);
+      setCertificateCount(0);
+      setBalance('N/A');
+    } finally {
+      setLoadingDashboard(false);
+    }
+  };
+
+  const refreshData = () => {
+    fetchContracts();
+    checkBackendHealth();
+    fetchDashboardData();
+  };
 
   const fetchContracts = async () => {
     try {
       const response = await fetch('http://localhost:5000/api/contracts/deployments');
       const data = await response.json();
-      
+
       if (data.success && Array.isArray(data.contracts)) {
-        // contracts is ALWAYS an array with guaranteed structure
         const processedContracts = data.contracts.map(contract => ({
           address: contract.contractAddress,
-          contractAddress: contract.contractAddress, // Keep both for compatibility
+          contractAddress: contract.contractAddress,
           name: contract.contractName,
-          contractName: contract.contractName, // Keep both for compatibility
+          contractName: contract.contractName,
           network: contract.network,
           deployer: contract.deployer,
           owner: contract.owner,
@@ -85,8 +206,7 @@ export default function AdminDashboard() {
         setContracts(processedContracts);
       } else {
         console.error('Failed to fetch contracts:', data.error);
-        setContracts([]); // Always ensure contracts is an array
-        // Fallback to localStorage if API fails
+        setContracts([]);
         const savedContracts = localStorage.getItem('deployedContracts');
         if (savedContracts) {
           try {
@@ -99,8 +219,7 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error('Failed to fetch contracts:', error);
-      setContracts([]); // Always ensure contracts is an array
-      // Fallback to localStorage if API fails
+      setContracts([]);
       const savedContracts = localStorage.getItem('deployedContracts');
       if (savedContracts) {
         try {
@@ -136,9 +255,7 @@ export default function AdminDashboard() {
     try {
       const response = await fetch('http://localhost:5000/api/contracts/deploy', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           network: contractForm.networkName,
           contractName: contractForm.contractName,
@@ -146,16 +263,12 @@ export default function AdminDashboard() {
       });
 
       const result = await response.json();
-      
+
       if (response.ok) {
-        await fetchContracts(); // Refresh contracts list
-        
+        await fetchContracts();
         setSuccess(`Contract deployed successfully! Address: ${result.deployment.contractAddress}`);
         setShowCreateContract(false);
-        setContractForm({
-          contractName: "",
-          networkName: "apothem",
-        });
+        setContractForm({ contractName: "", networkName: "apothem" });
       } else {
         setError(result.error);
       }
@@ -192,8 +305,7 @@ export default function AdminDashboard() {
     setError(null);
     setMintingProgress(null);
 
-    // Find the selected contract to get its name
-    const selectedContract = contracts.find(contract => 
+    const selectedContract = contracts.find(contract =>
       (contract.contractAddress || contract.address) === mintForm.contractAddress
     );
     const contractName = selectedContract ? (selectedContract.contractName || selectedContract.name) : '';
@@ -215,19 +327,14 @@ export default function AdminDashboard() {
       });
 
       const result = await response.json();
-      
+
       if (response.ok || response.status === 207) {
         setSuccess(result.message);
         if (result.results && Array.isArray(result.results.results)) {
           setMintingProgress(result.results.results);
         }
         setShowMintCertificates(false);
-        setMintForm({
-          eventName: "",
-          certificateName: "",
-          contractAddress: "",
-          participantList: null,
-        });
+        setMintForm({ eventName: "", certificateName: "", contractAddress: "", participantList: null });
         setCsvValidation(null);
       } else {
         setError(result.error);
@@ -240,7 +347,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white px-4 md:px-8 py-12">
+    <div className="min-h-screen bg-black text-white px-4 md:px-8 pt-0">
       <div className="fixed top-0 left-0 w-full h-full z-0">
         <DotGrid
           dotSize={5}
@@ -256,18 +363,115 @@ export default function AdminDashboard() {
         />
       </div>
 
-      <header className="relative z-10 flex justify-between items-center mb-12 pb-6">
-        <div className="flex items-center">
-          <h1 className="text-4xl font-extrabold text-white animate-fade-in">
-            Admin Dashboard
-          </h1>
-        </div>
-        <div className="flex items-center gap-4">
-          <p className="text-lg text-gray-400">Welcome, Admin!</p>
+      {/* New Header from Participant Dashboard */}
+      <header className="border-b border-gray-800 bg-black/50 backdrop-blur-sm sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-[#54D1DC] via-blue-400 to-[#54D1DC] bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-x">
+                Admin Dashboard
+              </h1>
+              <p className="text-gray-400 text-sm mt-1 animate-fade-in">
+                Admin Wallet: {wallet.slice(0, 6)}...{wallet.slice(-4)}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-6">
+              {backendStatus && (
+                <div className="flex items-center gap-3 animate-bounce-in">
+                  <div className="relative">
+                    <div
+                      className={`absolute inset-0 rounded-full opacity-70 animate-ripple ${
+                        backendStatus.status === "OK" ? "bg-green-400" : "bg-red-400"
+                      }`}
+                    ></div>
+                    <div
+                      className={`w-4 h-4 rounded-full animate-glow ${
+                        backendStatus.status === "OK"
+                          ? "bg-gradient-to-r from-green-400 to-emerald-500"
+                          : "bg-gradient-to-r from-red-400 to-pink-500"
+                      }`}
+                    ></div>
+                  </div>
+                  <span
+                    className={`text-sm font-semibold bg-clip-text text-transparent animate-shimmer ${
+                      backendStatus.status === "OK"
+                        ? "bg-gradient-to-r from-green-300 via-emerald-400 to-green-300"
+                        : "bg-gradient-to-r from-red-300 via-pink-400 to-red-300"
+                    }`}
+                  >
+                    {backendStatus.status === "OK" ? " Backend Online " : "Backend Offline "}
+                  </span>
+                </div>
+              )}
+
+              {shareSuccess && (
+                <div className="flex items-center gap-2 bg-green-600 px-3 py-1 rounded-lg">
+                  <svg
+                    className="w-4 h-4 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-sm text-white">Copied to clipboard!</span>
+                </div>
+              )}
+
+              {loadingDashboard && (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-[#54D1DC] border-t-transparent rounded-full animate-spin"></div>
+                  <span className="text-sm text-gray-400">Loading data...</span>
+                </div>
+              )}
+
+              <div className="bg-transparent rounded-lg px-4 py-2">
+                <div className="text-sm text-gray-400">XDC Balance</div>
+                <div className="text-lg font-bold text-[#54D1DC]">
+                  {balance ? `${parseFloat(balance).toFixed(4)} XDC` : "Loading..."}
+                </div>
+              </div>
+
+              <div className="relative group bg-transparent rounded-2xl px-6 py-4 overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105">
+                <div className="absolute inset-0 text-lg opacity-50 blur-xl"></div>
+                <div className="relative z-10">
+                  <div className="text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300 animate-shimmer">
+                    Certificates
+                  </div>
+                  <div className="text-2xl font-extrabold text-green-400 animate-glow animate-bounce-in">
+                    {certificateCount}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={refreshData}
+                disabled={loadingDashboard}
+                className="bg-gray-700 hover:bg-gray-600 p-2 rounded-lg transition-colors disabled:opacity-50"
+                title="Refresh Data"
+              >
+                <svg
+                  className={`w-5 h-5 ${loadingDashboard ? "animate-spin" : ""}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       </header>
+      {/* End of New Header */}
 
-      <main className="max-w-7xl mx-auto flex flex-col items-center">
+      <main className="max-w-7xl mx-auto flex flex-col items-center pt-20">
         <StarBorder className="w-full max-w-xl mx-auto">
           <div className="p-8 md:p-12 flex flex-col items-center">
             {/* Current Contracts Section */}
