@@ -91,7 +91,7 @@ function Footer() {
 
       {/* Bottom Row */}
       <div className="border-t border-gray-700 mt-8 pt-4 text-center text-xs text-gray-500">
-        © 2025 Neighborly. All rights reserved
+        © 2025 Certimos. All rights reserved
       </div>
     </footer>
   );
