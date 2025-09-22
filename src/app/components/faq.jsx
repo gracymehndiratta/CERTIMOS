@@ -57,7 +57,8 @@ export default function Faq() {
           <div
             key={index}
             className="faq-flip-card perspective cursor-pointer"
-            onClick={() => toggleFlip(index)}
+            onMouseEnter={() => toggleFlip(index)}
+            onMouseLeave={() => toggleFlip(index)}
           >
             <div
               className={`faq-flip-inner relative w-full min-h-[300px] transition-transform duration-500 transform-style-preserve-3d ${
