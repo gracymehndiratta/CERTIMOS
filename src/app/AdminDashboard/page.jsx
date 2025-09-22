@@ -1,4 +1,4 @@
- "use client";
+'use client';
 
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -17,33 +17,6 @@ import StarBorder from "../components/ui/StarBorder";
 export default function AdminDashboard() {
   
   const router = useRouter();
-
-  // Frontend Integration Pattern for /api/contracts/deployments
-  const fetchContractsWithPattern = async () => {
-    try {
-      const response = await fetch('/api/contracts/deployments');
-      const data = await response.json();
-      
-      if (data.success && Array.isArray(data.contracts)) {
-        // contracts is ALWAYS an array with guaranteed structure
-        return data.contracts.map(contract => ({
-          address: contract.contractAddress,
-          name: contract.contractName,
-          network: contract.network,
-          deployer: contract.deployer,
-          owner: contract.owner,
-          deployedAt: new Date(contract.deployedAt),
-          transactionHash: contract.transactionHash,
-          blockNumber: contract.blockNumber,
-          deploymentId: contract.deploymentId
-        }));
-      }
-      return [];
-    } catch (error) {
-      console.error('Failed to fetch contracts:', error);
-      return [];
-    }
-  };
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
@@ -84,7 +57,6 @@ export default function AdminDashboard() {
 
   // Load data on component mount
   useEffect(() => {
-
     fetchContracts();
   }, []);
 
@@ -269,7 +241,7 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-black text-white px-4 md:px-8 py-12">
       <header className="flex justify-between items-center mb-12 pb-6">
         <div className="flex items-center">
-          <h1 className="text-4xl font-extrabold text-white animate-fade-in">
+          <h1 className="text-4xl font-extrabold text-[#2cf2f9] animate-fade-in">
             Admin Dashboard
           </h1>
         </div>
@@ -286,12 +258,12 @@ export default function AdminDashboard() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto">
-        <StarBorder>
-          <div className="p-8 md:p-12">
+      <main className="max-w-7xl mx-auto flex flex-col items-center">
+        <StarBorder className="w-full max-w-lg mx-auto">
+          <div className="p-8 md:p-12 flex flex-col items-center">
             {/* Current Contracts Section */}
             <div className="mb-12">
-              <h2 className="text-2xl font-bold mb-6 text-[#2cf2f9]">Deployed Contracts</h2>
+              <h2 className="text-2xl font-bold mb-6 text-white">Deployed Contracts</h2>
               {contracts.length > 0 ? (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {contracts.map((contract, index) => (
@@ -314,7 +286,7 @@ export default function AdminDashboard() {
                   <p className="text-gray-400 mb-4">No contracts deployed yet</p>
                   <button
                     onClick={() => setShowCreateContract(true)}
-                    className="bg-[#2cf2f9] text-black px-6 py-2 rounded-lg font-semibold hover:bg-white transition-colors"
+                    className="bg-white text-black px-6 py-2 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
                   >
                     Deploy Your First Contract
                   </button>
@@ -326,7 +298,7 @@ export default function AdminDashboard() {
             <div className="flex flex-wrap gap-4 mb-8">
               <button
                 onClick={() => setShowCreateContract(true)}
-                className="flex items-center gap-2 bg-[#2cf2f9] text-black px-6 py-3 rounded-lg font-bold hover:bg-white transition-colors"
+                className="flex items-center gap-2 bg-white text-black px-6 py-3 rounded-lg font-bold hover:bg-gray-200 transition-colors"
               >
                 <FaPlus />
                 Create New Contract
@@ -379,7 +351,7 @@ export default function AdminDashboard() {
                     </div>
                   ))}
                 </div>
-              </div>
+                </div>
             )}
           </div>
         </StarBorder>
@@ -387,9 +359,9 @@ export default function AdminDashboard() {
         {/* Create Contract Modal */}
         {showCreateContract && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-900 p-8 rounded-lg max-w-md w-full border border-gray-600">
+            <div className="bg-black p-8 rounded-lg max-w-md w-full border border-gray-600">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-bold text-[#2cf2f9]">Deploy New Contract</h3>
+                <h3 className="text-2xl font-bold text-white">Deploy New Contract</h3>
                 <button
                   onClick={() => setShowCreateContract(false)}
                   className="text-gray-400 hover:text-white"
@@ -428,7 +400,7 @@ export default function AdminDashboard() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 py-3 px-6 bg-[#2cf2f9] text-black rounded-lg font-bold hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 py-3 px-6 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? <FaSpinner className="animate-spin mx-auto" /> : 'Deploy'}
                   </button>
@@ -570,7 +542,7 @@ export default function AdminDashboard() {
                   <button
                     type="submit"
                     disabled={loading || !csvValidation || !mintForm.contractAddress}
-                    className="flex-1 py-3 px-6 bg-[#2cf2f9] text-black rounded-lg font-bold hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 py-3 px-6 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? <FaSpinner className="animate-spin mx-auto" /> : 'Mint Certificates'}
                   </button>
