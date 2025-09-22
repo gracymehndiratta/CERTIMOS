@@ -241,7 +241,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-black text-white px-4 md:px-8 py-12">
       <FloatingPixels />
-      <header className="flex justify-between items-center mb-12 pb-6">
+      <header className="relative z-10 flex justify-between items-center mb-12 pb-6">
         <div className="flex items-center">
           <h1 className="text-4xl font-extrabold text-white animate-fade-in">
             Admin Dashboard
@@ -251,17 +251,12 @@ export default function AdminDashboard() {
           <p className="text-lg text-gray-400">
             Welcome, Admin!
           </p>
-          <button
-            onClick={() => signOut({ callbackUrl: "/" })}
-            className="rounded-lg bg-red-600 px-6 py-3 text-lg font-bold hover:scale-105 transition-transform"
-          >
-            Sign Out
-          </button>
+          
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto flex flex-col items-center">
-        <StarBorder className="w-full max-w-lg mx-auto">
+        <StarBorder className="w-full max-w-xl mx-auto">
           <div className="p-8 md:p-12 flex flex-col items-center">
             {/* Current Contracts Section */}
             <div className="mb-12">
