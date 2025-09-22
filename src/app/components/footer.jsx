@@ -25,12 +25,11 @@ function Footer() {
         {/* Left - About */}
         <div>
           <p className="text-sm z-50 leading-relaxed">
-            <span className="text-teal-400 font-semibold">Neighborly</span> is a
-            smart society management platform that connects residents, staff,
-            and admins in one place. From paying maintenance and booking
-            facilities to raising complaints and staying updated with notices,
-            Neighborly makes community living easy, transparent, and
-            hassle-free.
+            <span className="text-teal-400 font-semibold">CERTIMOS</span>
+             is a blockchain-based platform for issuing and verifying
+            certificates and badges as NFTs. It ensures tamper-proof, permanent,
+            and verifiable credentials for participants, while providing
+            organizers with a seamless certificate management system.
           </p>
           <div className="z-50 flex space-x-4 mt-4">
             <a href="#" className="hover:text-teal-400 z-50">
