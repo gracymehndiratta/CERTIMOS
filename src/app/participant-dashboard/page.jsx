@@ -205,6 +205,19 @@ export default function ParticipantDashboard() {
   const [shareSuccess, setShareSuccess] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
+  // ⭐ NEW: State for valuation data
+  const [totalPoints, setTotalPoints] = useState(0);
+  const [valueBreakdown, setValueBreakdown] = useState(null);
+
+  // 🎭 NEW: Styles for rarity levels
+  const rarityStyles = {
+    Legendary: 'bg-yellow-500 border-yellow-400 text-black',
+    Epic: 'bg-purple-600 border-purple-500 text-white',
+    Rare: 'bg-blue-600 border-blue-500 text-white',
+    Uncommon: 'bg-green-600 border-green-500 text-white',
+    Common: 'bg-gray-600 border-gray-500 text-white',
+  };
+
   useEffect(() => {
     setIsClient(true);
     checkBackendHealth();
@@ -261,7 +274,12 @@ export default function ParticipantDashboard() {
           const certs = certsData.certificates || [];
           console.log('Certificates with metadata:', certs);
           setCertificates(certs);
-          setCertificateCount(certsData.count || certs.length);
+
+          // ⭐ UPDATED: Set new valuation and breakdown data
+          setCertificateCount(certsData.valueBreakdown?.totalCertificates || certsData.count || certs.length);
+          setTotalPoints(certsData.totalPoints || 0);
+          setValueBreakdown(certsData.valueBreakdown || null);
+
         } else {
           throw new Error(certsData.error || 'Failed to fetch certificates');
         }
@@ -269,6 +287,8 @@ export default function ParticipantDashboard() {
         console.error('Certificates fetch failed:', certificatesResponse.reason);
         setCertificates([]);
         setCertificateCount(0);
+        setTotalPoints(0);
+        setValueBreakdown(null);
       }
 
       // Handle balance response
@@ -380,9 +400,8 @@ export default function ParticipantDashboard() {
   const shareToLinkedIn = (certificate) => {
     const certName = getCertificateName(certificate);
     const eventName = getEventName(certificate);
-    const recipientName = getRecipientName(certificate);
     
-    const shareText = `🎓 I've earned a blockchain certificate: ${certName}${eventName ? ` from ${eventName}` : ''}!\n\nVerified on XDC Network - Token ID: #${certificate.tokenId}\n\n#BlockchainEducation #Certificate #XDC #Achievement`;
+    const shareText = `🎓 I've earned a blockchain certificate: ${certName}${eventName ? ` from ${eventName}` : ''}!\n\nThis ${getCertificateRarity(certificate)} certificate is worth ${getCertificatePoints(certificate)} points and is verified on the XDC Network.\n\nToken ID: #${certificate.tokenId}\n\n#BlockchainEducation #Certificate #XDC #Achievement #NFT`;
     const shareUrl = `https://testnet.xdcscan.com/token/${contractAddress}/${certificate.tokenId}`;
     
     const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
@@ -395,7 +414,7 @@ export default function ParticipantDashboard() {
     const certName = getCertificateName(certificate);
     const eventName = getEventName(certificate);
     
-    const shareText = `🎓 Just earned my blockchain certificate: ${certName}${eventName ? ` from ${eventName}` : ''}! Verified on @XDCFoundation Network. Token #${certificate.tokenId} #BlockchainEducation #Certificate #XDC`;
+    const shareText = `🎓 Just earned my ${getCertificateRarity(certificate)} blockchain certificate: ${certName}${eventName ? ` from ${eventName}` : ''}! Worth ${getCertificatePoints(certificate)} points. Verified on @XDCFoundation Network. Token #${certificate.tokenId} #BlockchainEducation #Certificate #XDC`;
     const shareUrl = `https://testnet.xdcscan.com/token/${contractAddress}/${certificate.tokenId}`;
     
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
@@ -422,6 +441,10 @@ export default function ParticipantDashboard() {
 Certificate: ${certName}
 ${eventName ? `Event: ${eventName}` : ''}
 ${recipientName ? `Recipient: ${recipientName}` : ''}
+
+Rarity: ${getCertificateRarity(certificate)}
+Category: ${getCertificateCategory(certificate)}
+Points: ${getCertificatePoints(certificate)}
 Token ID: #${certificate.tokenId}
 
 Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${certificate.tokenId}
@@ -464,6 +487,12 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
   const getCertificateAttributes = (cert) => {
     return cert.attributes || cert.metadata?.attributes || [];
   };
+
+  // ⭐ NEW: Helpers for valuation data
+  const getCertificatePoints = (cert) => cert.points || 0;
+  const getCertificateRarity = (cert) => cert.rarity || 'Common';
+  const getCertificateCategory = (cert) => cert.category || 'General';
+
 
   const getEventName = (cert) => {
     return cert.event_name || cert.metadata?.event_name || 
@@ -559,10 +588,10 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
               </p>
             </div>
             
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
               {/* Backend Status */}
               {backendStatus && (
-                <div className="flex items-center gap-2">
+                <div className="hidden md:flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${
                     backendStatus.status === 'OK' ? 'bg-green-400' : 'bg-red-400'
                   }`}></div>
@@ -578,15 +607,7 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                   <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-sm text-white">Copied to clipboard!</span>
-                </div>
-              )}
-              
-              {/* Loading indicator only shows during initial load */}
-              {loading && (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-[#54D1DC] border-t-transparent rounded-full animate-spin"></div>
-                  <span className="text-sm text-gray-400">Loading certificates...</span>
+                  <span className="text-sm text-white">Copied!</span>
                 </div>
               )}
               
@@ -603,6 +624,14 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                 <div className="text-sm text-gray-400">Certificates</div>
                 <div className="text-lg font-bold text-green-400">
                   {certificateCount}
+                </div>
+              </div>
+
+              {/* ⭐ NEW: Total Points Display */}
+              <div className="bg-gray-800 rounded-lg px-4 py-2">
+                <div className="text-sm text-gray-400">Total Value</div>
+                <div className="text-lg font-bold text-yellow-400">
+                  {loading ? '...' : `${totalPoints.toLocaleString()} PTS`}
                 </div>
               </div>
 
@@ -634,6 +663,45 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
               </div>
             </div>
           </div>
+        )}
+
+        {/* ⭐ NEW: Value Breakdown Section */}
+        {!loading && valueBreakdown && (
+          <section className="mb-10">
+            <h2 className="text-2xl font-bold mb-4">Your Statistics</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Average Points */}
+              <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                <h3 className="text-gray-400 text-sm font-medium mb-1">Average Value</h3>
+                <p className="text-3xl font-bold text-yellow-400">{valueBreakdown.averagePoints.toFixed(0)} PTS</p>
+                <p className="text-gray-500 text-xs">per certificate</p>
+              </div>
+              {/* Rarity Distribution */}
+              <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                 <h3 className="text-gray-400 text-sm font-medium mb-2">Rarity Distribution</h3>
+                 <div className="space-y-2">
+                   {Object.entries(valueBreakdown.rarityDistribution).map(([rarity, count]) => (
+                     <div key={rarity} className="flex justify-between items-center text-sm">
+                       <span className={`${rarityStyles[rarity]} px-2 py-0.5 rounded text-xs font-semibold border`}>{rarity}</span>
+                       <span className="font-bold text-white">{count}</span>
+                     </div>
+                   ))}
+                 </div>
+              </div>
+              {/* Category Distribution */}
+              <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                 <h3 className="text-gray-400 text-sm font-medium mb-2">Category Distribution</h3>
+                 <div className="space-y-2">
+                   {Object.entries(valueBreakdown.categoryDistribution).map(([category, count]) => (
+                     <div key={category} className="flex justify-between items-center text-sm">
+                       <span className="text-gray-300">{category}</span>
+                       <span className="font-bold text-white">{count}</span>
+                     </div>
+                   ))}
+                 </div>
+              </div>
+            </div>
+          </section>
         )}
 
         {/* Certificates Section */}
@@ -678,94 +746,86 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                 <div
                   key={cert.tokenId}
                   onClick={() => handleCertificateClick(cert)}
-                  className="bg-gray-800 rounded-xl shadow-lg p-6 hover:bg-gray-750 transition-all cursor-pointer transform hover:scale-105 border border-gray-700 hover:border-[#54D1DC]/50"
+                  className="bg-gray-800 rounded-xl shadow-lg p-6 hover:bg-gray-750 transition-all cursor-pointer transform hover:scale-105 border border-gray-700 hover:border-[#54D1DC]/50 flex flex-col"
                 >
                   <div className="relative mb-4">
                     <img
-                      src={resolveIPFS(getCertificateImage(cert)) || "/placeholder-certificate.png"}
+                      src={getCertificateImage(cert) || "/placeholder-certificate.png"}
                       alt={getCertificateName(cert)}
-                      className="w-full h-48 object-contain rounded-lg bg-gray-700"
+                      className="w-full h-48 object-cover rounded-lg bg-gray-700"
                       onError={(e) => {
-                        e.target.src = "/placeholder-certificate.png";
+                        console.log('Image failed to load:', e.target.src);
+                        if (e.target.src !== `${window.location.origin}/placeholder-certificate.png`) {
+                          e.target.src = "/placeholder-certificate.png";
+                        }
+                      }}
+                      onLoad={(e) => {
+                        console.log('Image loaded successfully:', e.target.src);
                       }}
                     />
                     <div className="absolute top-2 right-2 bg-[#54D1DC] text-black px-2 py-1 rounded text-xs font-bold">
                       #{cert.tokenId}
                     </div>
-                    {getCertificateLevel(cert) && (
-                      <div className="absolute top-2 left-2 bg-purple-600 text-white px-2 py-1 rounded text-xs font-bold">
-                        {getCertificateLevel(cert)}
-                      </div>
-                    )}
+                    {/* ⭐ UPDATED: Rarity Badge on Card */}
+                    <div className={`absolute top-2 left-2 px-2 py-1 rounded text-xs font-bold border ${rarityStyles[getCertificateRarity(cert)]}`}>
+                      {getCertificateRarity(cert)}
+                    </div>
                   </div>
                   
-                  <h3 className="text-xl font-bold mb-2 text-white">
-                    {getCertificateName(cert)}
-                  </h3>
+                  <div className="flex-grow">
+                    <h3 className="text-xl font-bold mb-2 text-white">
+                      {getCertificateName(cert)}
+                    </h3>
 
-                  {/* Event Name */}
-                  {getEventName(cert) && (
-                    <div className="mb-2">
-                      <span className="text-xs text-gray-400 uppercase tracking-wide">Event</span>
-                      <p className="text-[#54D1DC] font-semibold text-sm">
-                        {getEventName(cert)}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Recipient Name */}
-                  {getRecipientName(cert) && (
-                    <div className="mb-2">
-                      <span className="text-xs text-gray-400 uppercase tracking-wide">Recipient</span>
-                      <p className="text-white font-medium text-sm">
-                        {getRecipientName(cert)}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Date Issued */}
-                  {getDateIssued(cert) && (
-                    <div className="mb-3">
-                      <span className="text-xs text-gray-400 uppercase tracking-wide">Issued</span>
-                      <p className="text-gray-300 text-sm">
-                        {formatDate(getDateIssued(cert))}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Skills */}
-                  {getSkills(cert).length > 0 && (
-                    <div className="mb-3">
-                      <span className="text-xs text-gray-400 uppercase tracking-wide block mb-1">Skills</span>
-                      <div className="flex flex-wrap gap-1">
-                        {getSkills(cert).slice(0, 3).map((skill, index) => (
-                          <span key={index} className="bg-blue-600 text-white text-xs px-2 py-1 rounded">
-                            {skill}
-                          </span>
-                        ))}
-                        {getSkills(cert).length > 3 && (
-                          <span className="bg-gray-700 text-xs px-2 py-1 rounded">
-                            +{getSkills(cert).length - 3} more
-                          </span>
-                        )}
+                    {/* Event Name & Category */}
+                    <div className="grid grid-cols-2 gap-4 mb-3">
+                      {getEventName(cert) && (
+                        <div>
+                          <span className="text-xs text-gray-400 uppercase tracking-wide">Event</span>
+                          <p className="text-[#54D1DC] font-semibold text-sm truncate">
+                            {getEventName(cert)}
+                          </p>
+                        </div>
+                      )}
+                       {/* ⭐ NEW: Category on Card */}
+                      <div>
+                        <span className="text-xs text-gray-400 uppercase tracking-wide">Category</span>
+                        <p className="text-white font-medium text-sm">
+                          {getCertificateCategory(cert)}
+                        </p>
                       </div>
                     </div>
-                  )}
 
-                  {/* Description fallback if no specific fields */}
-                  {!getEventName(cert) && !getRecipientName(cert) && getCertificateDescription(cert) && (
-                    <p className="text-gray-400 mb-3 text-sm line-clamp-2">
-                      {getCertificateDescription(cert)}
-                    </p>
-                  )}
-
-                  <div className="flex justify-between items-center">
+                    {/* Recipient & Date */}
+                     <div className="grid grid-cols-2 gap-4 mb-3">
+                      {getRecipientName(cert) && (
+                          <div>
+                            <span className="text-xs text-gray-400 uppercase tracking-wide">Recipient</span>
+                            <p className="text-white font-medium text-sm truncate">
+                              {getRecipientName(cert)}
+                            </p>
+                          </div>
+                      )}
+                      {getDateIssued(cert) && (
+                          <div>
+                            <span className="text-xs text-gray-400 uppercase tracking-wide">Issued</span>
+                            <p className="text-gray-300 text-sm">
+                              {formatDate(getDateIssued(cert))}
+                            </p>
+                          </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Footer with Points and action text */}
+                  <div className="mt-auto pt-4 border-t border-gray-700 flex justify-between items-center">
+                    {/* ⭐ NEW: Points on Card */}
+                    <div className="font-bold text-yellow-400 text-lg">
+                      {getCertificatePoints(cert).toLocaleString()} PTS
+                    </div>
                     <span className="text-[#54D1DC] text-sm font-semibold">
-                      Click to view details
+                      View details →
                     </span>
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
                   </div>
                 </div>
               ))}
@@ -804,11 +864,17 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                 {/* Certificate Image */}
                 <div>
                   <img
-                    src={resolveIPFS(getCertificateImage(selectedCertificate)) || "/placeholder-certificate.png"}
+                    src={getCertificateImage(selectedCertificate) || "/placeholder-certificate.png"}
                     alt={getCertificateName(selectedCertificate)}
-                    className="w-full h-80 object-contain rounded-lg bg-gray-700"
+                    className="w-full h-80 object-cover rounded-lg bg-gray-700"
                     onError={(e) => {
-                      e.target.src = "/placeholder-certificate.png";
+                      console.log('Modal image failed to load:', e.target.src);
+                      if (e.target.src !== `${window.location.origin}/placeholder-certificate.png`) {
+                        e.target.src = "/placeholder-certificate.png";
+                      }
+                    }}
+                    onLoad={(e) => {
+                      console.log('Modal image loaded successfully:', e.target.src);
                     }}
                   />
                 </div>
@@ -827,24 +893,31 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                     </div>
                   )}
 
-                  {/* Certificate Level and Date */}
-                  <div className="grid grid-cols-2 gap-4">
-                    {getCertificateLevel(selectedCertificate) && (
-                      <div className="bg-purple-600/20 border border-purple-600 p-3 rounded-lg">
-                        <div className="text-xs text-purple-300 uppercase tracking-wide">Level</div>
-                        <p className="text-purple-100 font-bold">{getCertificateLevel(selectedCertificate)}</p>
+                  {/* ⭐ UPDATED: Valuation Details in Modal */}
+                   <div className="grid grid-cols-3 gap-4">
+                      <div className="bg-yellow-600/20 border border-yellow-600 p-3 rounded-lg text-center">
+                        <div className="text-xs text-yellow-300 uppercase tracking-wide">Points</div>
+                        <p className="text-yellow-100 font-bold text-lg">{getCertificatePoints(selectedCertificate).toLocaleString()}</p>
                       </div>
-                    )}
-                    
-                    {getDateIssued(selectedCertificate) && (
-                      <div className="bg-blue-600/20 border border-blue-600 p-3 rounded-lg">
-                        <div className="text-xs text-blue-300 uppercase tracking-wide">Date Issued</div>
-                        <p className="text-blue-100 font-semibold">
-                          {formatDate(getDateIssued(selectedCertificate))}
-                        </p>
+                       <div className={`border p-3 rounded-lg text-center ${rarityStyles[getCertificateRarity(selectedCertificate)]}`}>
+                        <div className="text-xs uppercase tracking-wide opacity-80">Rarity</div>
+                        <p className="font-bold">{getCertificateRarity(selectedCertificate)}</p>
                       </div>
-                    )}
+                      <div className="bg-gray-600/20 border border-gray-600 p-3 rounded-lg text-center">
+                        <div className="text-xs text-gray-300 uppercase tracking-wide">Category</div>
+                        <p className="text-gray-100 font-semibold">{getCertificateCategory(selectedCertificate)}</p>
+                      </div>
                   </div>
+
+                  {/* Date Issued */}
+                  {getDateIssued(selectedCertificate) && (
+                    <div className="bg-blue-600/20 border border-blue-600 p-3 rounded-lg">
+                      <div className="text-xs text-blue-300 uppercase tracking-wide">Date Issued</div>
+                      <p className="text-blue-100 font-semibold">
+                        {formatDate(getDateIssued(selectedCertificate))}
+                      </p>
+                    </div>
+                  )}
 
                   {/* Skills Section */}
                   {getSkills(selectedCertificate).length > 0 && (
@@ -953,8 +1026,8 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                   </div>
                 </div>
               </div>
-
-              {/* Action Buttons */}
+              
+              {/* ✅ ACTION BUTTONS RESTORED HERE */}
               <div className="mt-6 pt-6 border-t border-gray-700">
                 <div className="flex flex-col sm:flex-row gap-4">
                   {/* View Contract Button */}
@@ -1030,6 +1103,7 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                   )}
                 </div>
               </div>
+
             </div>
           </div>
         </div>
@@ -1058,7 +1132,12 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                 {getEventName(selectedCertificate) && (
                   <p className="text-[#54D1DC] text-sm">{getEventName(selectedCertificate)}</p>
                 )}
-                <p className="text-gray-300 text-xs">Token #{selectedCertificate.tokenId}</p>
+                 <div className="mt-2 flex justify-center items-center gap-4 text-xs">
+                    <span className={`px-2 py-0.5 rounded font-semibold border ${rarityStyles[getCertificateRarity(selectedCertificate)]}`}>
+                        {getCertificateRarity(selectedCertificate)}
+                    </span>
+                    <span className="text-yellow-400 font-bold">{getCertificatePoints(selectedCertificate)} PTS</span>
+                </div>
               </div>
 
               {/* Share Options */}
@@ -1082,17 +1161,7 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                   </svg>
                   Share on Twitter
                 </button>
-
-                <button
-                  onClick={() => shareToFacebook(selectedCertificate)}
-                  className="w-full bg-[#4267B2] hover:bg-[#365899] text-white px-4 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-3"
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                  </svg>
-                  Share on Facebook
-                </button>
-
+                
                 <button
                   onClick={() => copyToClipboard(selectedCertificate)}
                   className="w-full bg-gray-700 hover:bg-gray-600 text-white px-4 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-3"
