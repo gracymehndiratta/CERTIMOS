@@ -7,7 +7,7 @@ import DotGrid from "./ui/DotGrid";
 
 export default function AboutPage() {
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center select-none">
+    <section className="relative min-h-screen flex flex-col bg-transparent items-center justify-center select-none">
       {/* Full-page Dot Grid */}
       <div className="fixed top-0 left-0 w-full h-full -z-10">
         <DotGrid
@@ -25,14 +25,14 @@ export default function AboutPage() {
       </div>
 
       {/* Sticky heading */}
-      <div className="sticky top-0 bg-transparent text-white pt-20 pb-16 z-10">
+      <div className="sticky top-0  text-white pt-20 pb-16 z-10">
         <h3 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-center bg-clip-text text-transparent bg-gradient-to-r from-[#54D1DC] to-white animate-pulse">
           Why Choose Us?
         </h3>
       </div>
 
       {/* Animated items */}
-      <div className="relative z-20 flex flex-col gap-20 px-4 md:px-16 max-w-6xl mx-auto">
+      <div className="relative  z-20 flex flex-col gap-20 px-4 md:px-16 max-w-6xl mx-auto">
         <AnimatedItem
           id="future"
           text="Future-Proof"

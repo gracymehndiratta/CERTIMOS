@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import DotGrid from "./ui/DotGrid";
+import Link from "next/link";
 
 export default function Faq() {
   const [flippedIndex, setFlippedIndex] = useState(null);
@@ -65,7 +66,7 @@ export default function Faq() {
 
       {/* Section Content */}
       <div className="relative z-50 px-4 py-16">
-        <h2 className="faq-title text-white text-3xl sm:text-4xl font-bold mb-10 text-center">
+        <h2 className="faq-title  text-white text-3xl sm:text-4xl font-bold mb-10 text-center">
           Frequently Asked Questions
         </h2>
 

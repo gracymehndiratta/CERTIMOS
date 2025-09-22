@@ -119,7 +119,7 @@ export default function LandingPage() {
       {/* Grid Background - Full screen */}
 
       {/* Content overlay */}
-      <div className="max-w-7xl w-full flex flex-col lg:flex-row items-start justify-start relative z-40">
+      <div className="max-w-7xl w-full flex flex-col lg:flex-row items-start justify-start z-50 ">
         <div className="flex-1 max-w-2xl text-left">
           <h1 className=" px-6 py-6 text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
             CERTIMOS.
@@ -133,7 +133,7 @@ export default function LandingPage() {
             <button
               onClick={() => router.push("/AdminDashboard")}
               disabled={isLoading}
-              className="rounded-lg bg-white text-black px-6 py-4 z-20 text-2xl font-bold hover:scale-105 transition-transform"
+              className="relative  rounded-lg bg-white text-black px-6 py-4 text-2xl font-bold hover:scale-105 transition-transform"
             >
               {isLoading ? (
                 <>
@@ -147,7 +147,7 @@ export default function LandingPage() {
 
             <button
               onClick={handleConnectWallet}
-              className="rounded-lg bg-black text-white px-8 py-4 border-white text-2xl font-bold hover:scale-105 transition-transform"
+              className="relative  rounded-lg bg-black text-white px-8 py-4 text-2xl font-bold hover:scale-105 transition-transform"
             >
               VIEW CERTIFICATES
             </button>
