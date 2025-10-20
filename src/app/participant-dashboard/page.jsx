@@ -22,15 +22,16 @@ function resolveIPFS(uri) {
   return uri;
 }
 
-// Helper function to fetch IPFS metadata
+// Helper function to fetch IPFS metadata with better error handling
 async function fetchIPFSMetadata(tokenURI) {
   try {
     if (!tokenURI) return null;
     
     if (tokenURI.startsWith('http')) {
-      const response = await fetch(tokenURI);
+      const response = await fetch(tokenURI, { timeout: 10000 });
       if (!response.ok) {
-        throw new Error(`Failed to fetch metadata: ${response.status}`);
+        console.warn(`Failed to fetch metadata: ${response.status}`);
+        return null;
       }
       return await response.json();
     } else if (tokenURI.startsWith('data:application/json')) {
@@ -43,9 +44,10 @@ async function fetchIPFSMetadata(tokenURI) {
     const resolvedURL = resolveIPFS(tokenURI);
     console.log('Fetching metadata from:', resolvedURL);
     
-    const response = await fetch(resolvedURL);
+    const response = await fetch(resolvedURL, { timeout: 10000 });
     if (!response.ok) {
-      throw new Error(`Failed to fetch metadata: ${response.status}`);
+      console.warn(`Failed to fetch metadata: ${response.status}`);
+      return null;
     }
     
     const metadata = await response.json();
@@ -86,30 +88,41 @@ const apiService = {
   // Get all certificates for a wallet with metadata - SIMPLIFIED VERSION
   async getCertificates(walletAddress) {
     try {
+      console.log(`🔍 Fetching certificates for wallet: ${walletAddress}`);
+      
       // 1. Get basic certificate data (fast - 2-5 seconds)
       const response = await fetch(`${API_BASE_URL}/certificates/wallet/${walletAddress}`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-        }
+        },
+        timeout: 15000 // Reduce from 30s to 15s
       });
       
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`API Error: ${response.status} - ${errorText}`);
         throw new Error(`Failed to fetch certificates: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();
+      console.log('📊 API Response:', data);
       
       if (data.success && data.certificates) {
-        // 2. Fetch metadata for certificates that have tokenURI
+        // 2. Fetch metadata for certificates that have tokenURI (with limited concurrency)
         const certificatesWithMetadata = await Promise.all(
-          data.certificates.map(async (cert) => {
+          data.certificates.map(async (cert, index) => {
             if (!cert.tokenURI) {
               return cert; // Return as-is if no tokenURI
             }
 
             try {
+              // Add delay for IPFS requests to avoid rate limiting
+              if (index > 0) {
+                await new Promise(resolve => setTimeout(resolve, 100 * index));
+              }
+              
               const metadata = await fetchIPFSMetadata(cert.tokenURI);
               return {
                 ...cert,
@@ -201,7 +214,7 @@ export default function ParticipantDashboard() {
   const [error, setError] = useState(null);
   const [selectedCertificate, setSelectedCertificate] = useState(null);
   const [backendStatus, setBackendStatus] = useState(null);
-  const [contractAddress, setContractAddress] = useState('0x9b40c3c0656434fd89bC50671a29d1814EDA8079');
+  const [contractAddress, setContractAddress] = useState(''); // Removed hardcoded address
   const [shareSuccess, setShareSuccess] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
@@ -221,8 +234,7 @@ export default function ParticipantDashboard() {
   useEffect(() => {
     setIsClient(true);
     checkBackendHealth();
-    // Set the fixed contract address
-    setContractAddress('0x9b40c3c0656434fd89bC50671a29d1814EDA8079');
+    // Removed hardcoded contract address - will be set dynamically
   }, []);
 
   useEffect(() => {
@@ -234,10 +246,19 @@ export default function ParticipantDashboard() {
 
     const storedWallet = localStorage.getItem("walletAddress");
     if (!storedWallet) {
-      setError("No wallet connected! Please connect your wallet first.");
+      setError("No wallet connected! Please connect your wallet from the home page first.");
       setLoading(false);
       return;
     }
+    
+    // Validate wallet address format
+    if (!storedWallet.match(/^0x[a-fA-F0-9]{40}$/)) {
+      setError("Invalid wallet address format. Please reconnect your wallet.");
+      localStorage.removeItem("walletAddress");
+      setLoading(false);
+      return;
+    }
+    
     setWallet(storedWallet);
     fetchWalletData(storedWallet);
   }, [isClient]);
@@ -257,9 +278,21 @@ export default function ParticipantDashboard() {
     try {
       setLoading(true);
       setError(null);
+      console.log(`🔄 Starting data fetch for wallet: ${address}`);
 
       // Ensure we're on the correct network
       await ensureCorrectNetwork();
+
+      // Check backend connectivity first
+      try {
+        await apiService.checkHealth();
+        console.log('✅ Backend is healthy');
+      } catch (healthError) {
+        console.error('❌ Backend health check failed:', healthError);
+        setError('Backend service is not available. Please try again later.');
+        setLoading(false);
+        return;
+      }
 
       // Fetch certificates and balance in parallel
       const [certificatesResponse, balanceResponse] = await Promise.allSettled([
@@ -272,7 +305,7 @@ export default function ParticipantDashboard() {
         const certsData = certificatesResponse.value;
         if (certsData.success) {
           const certs = certsData.certificates || [];
-          console.log('Certificates with metadata:', certs);
+          console.log('✅ Certificates with metadata:', certs);
           setCertificates(certs);
 
           // ⭐ UPDATED: Set new valuation and breakdown data
@@ -281,10 +314,12 @@ export default function ParticipantDashboard() {
           setValueBreakdown(certsData.valueBreakdown || null);
 
         } else {
+          console.error('❌ Certificate API returned error:', certsData.error);
           throw new Error(certsData.error || 'Failed to fetch certificates');
         }
       } else {
-        console.error('Certificates fetch failed:', certificatesResponse.reason);
+        console.error('❌ Certificates fetch failed:', certificatesResponse.reason);
+        setError(`Failed to load certificates: ${certificatesResponse.reason?.message || 'Unknown error'}`);
         setCertificates([]);
         setCertificateCount(0);
         setTotalPoints(0);
@@ -296,17 +331,20 @@ export default function ParticipantDashboard() {
         const balanceData = balanceResponse.value;
         if (balanceData.success) {
           setBalance(balanceData.balance.formatted);
+          console.log('✅ Balance loaded:', balanceData.balance.formatted);
         } else {
+          console.warn('⚠️ Balance API failed, trying direct fetch');
           await fetchDirectBalance(address);
         }
       } else {
-        console.error('Balance fetch failed:', balanceResponse.reason);
+        console.error('❌ Balance fetch failed:', balanceResponse.reason);
         await fetchDirectBalance(address);
       }
 
       setLoading(false);
+      console.log('✅ Wallet data fetch completed successfully');
     } catch (err) {
-      console.error("Error fetching wallet data:", err);
+      console.error("❌ Error fetching wallet data:", err);
       setError(`Failed to load dashboard data: ${err.message}`);
       setLoading(false);
     }
@@ -366,6 +404,29 @@ export default function ParticipantDashboard() {
   };
 
   const handleConnectWallet = () => {
+    window.location.href = '/';
+  };
+
+  const handleLogout = () => {
+    // Clear all stored wallet data
+    localStorage.removeItem("walletAddress");
+    
+    // Optionally try to disconnect from MetaMask (not all wallets support this)
+    if (window.ethereum && window.ethereum.request) {
+      try {
+        // Some wallets support wallet_revokePermissions
+        window.ethereum.request({
+          method: "wallet_revokePermissions",
+          params: [{ eth_accounts: {} }]
+        }).catch(() => {
+          // Ignore errors if not supported
+        });
+      } catch (error) {
+        // Ignore errors
+      }
+    }
+    
+    // Redirect to home page
     window.location.href = '/';
   };
 
@@ -646,6 +707,15 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
               </button>
+
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors text-white font-semibold"
+                title="Logout"
+              >
+                Logout
+              </button>
             </div>
           </div>
         </div>
@@ -755,9 +825,8 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                       className="w-full h-48 object-cover rounded-lg bg-gray-700"
                       onError={(e) => {
                         console.log('Image failed to load:', e.target.src);
-                        if (e.target.src !== `${window.location.origin}/placeholder-certificate.png`) {
-                          e.target.src = "/placeholder-certificate.png";
-                        }
+                        // Set a data URL placeholder if file doesn't exist
+                        e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDIwMCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTUwIiBmaWxsPSIjMzc0MTUxIi8+CjxwYXRoIGQ9Ik0xMDAgNzVDMTEwLjQ5MyA3NSAxMTkgNjYuNDkzNCAxMTkgNTZDMTE5IDQ1LjUwNjYgMTEwLjQ5MyAzNyAxMDAgMzdDODkuNTA2NiAzNyA4MSA0NS41MDY2IDgxIDU2QzgxIDY2LjQ5MzQgODkuNTA2NiA3NSAxMDAgNzVaIiBmaWxsPSIjNkI3Mjg4Ii8+CjxwYXRoIGQ9Ik01MCA5OUM1MCA5NSA1My40IDg5IDYwIDg5SDEwMEgxNDBDMTQ2LjYgODkgMTUwIDk1IDE1MCA5OVYxMTNINTBWOTlaIiBmaWxsPSIjNkI3Mjg4Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTMwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOUI5Q0E0IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiPkNlcnRpZmljYXRlPC90ZXh0Pgo8L3N2Zz4K';
                       }}
                       onLoad={(e) => {
                         console.log('Image loaded successfully:', e.target.src);
@@ -869,9 +938,8 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                     className="w-full h-80 object-cover rounded-lg bg-gray-700"
                     onError={(e) => {
                       console.log('Modal image failed to load:', e.target.src);
-                      if (e.target.src !== `${window.location.origin}/placeholder-certificate.png`) {
-                        e.target.src = "/placeholder-certificate.png";
-                      }
+                      // Set a data URL placeholder
+                      e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDIwMCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTUwIiBmaWxsPSIjMzc0MTUxIi8+CjxwYXRoIGQ9Ik0xMDAgNzVDMTEwLjQ5MyA3NSAxMTkgNjYuNDkzNCAxMTkgNTZDMTE5IDQ1LjUwNjYgMTEwLjQ5MyAzNyAxMDAgMzdDODkuNTA2NiAzNyA4MSA0NS41MDY2IDgxIDU2QzgxIDY2LjQ5MzQgODkuNTA2NiA3NSAxMDAgNzVaIiBmaWxsPSIjNkI3Mjg4Ii8+CjxwYXRoIGQ9Ik01MCA5OUM1MCA5NSA1My40IDg5IDYwIDg5SDEwMEgxNDBDMTQ2LjYgODkgMTUwIDk1IDE1MCA5OVYxMTNINTBWOTlaIiBmaWxsPSIjNkI3Mjg4Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTMwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOUI5Q0E0IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiPkNlcnRpZmljYXRlPC90ZXh0Pgo8L3N2Zz4K';
                     }}
                     onLoad={(e) => {
                       console.log('Modal image loaded successfully:', e.target.src);
