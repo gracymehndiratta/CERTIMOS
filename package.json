@@ -11,7 +11,7 @@
   "dependencies": {
     "@rainbow-me/rainbowkit": "^2.2.8",
     "ethers": "^6.15.0",
-    "framer-motion": "^12.23.16",
+    "framer-motion": "^12.23.18",
     "gl-matrix": "^3.4.4",
     "gsap": "^3.13.0",
     "next": "15.5.3",

@@ -21,9 +21,83 @@ import {
   FaExternalLinkAlt
 } from "react-icons/fa";
 import StarBorder from "../components/ui/StarBorder";
+import FloatingPixels from "../components/ui/FloatingPixels";
+import { ethers } from "ethers";
+
+// Backend API Configuration
+const POSSIBLE_BACKEND_URLS = [
+  "http://localhost:5000",
+  "http://localhost:3001",
+  "http://127.0.0.1:5000"
+];
+
+let API_BASE_URL = "http://localhost:5000/api";
+let HEALTH_URL = "http://localhost:5000/health";
+
+const apiService = {
+  async findWorkingBackend() {
+    for (const baseUrl of POSSIBLE_BACKEND_URLS) {
+      try {
+        const response = await fetch(`${baseUrl}/health`, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+        });
+        if (response.ok) {
+          API_BASE_URL = `${baseUrl}/api`;
+          HEALTH_URL = `${baseUrl}/health`;
+          return await response.json();
+        }
+      } catch (error) {
+        console.log(`Backend not available at ${baseUrl}:`, error.message);
+        continue;
+      }
+    }
+    throw new Error('No backend server found. Please start your backend server.');
+  },
+
+  async getCertificates() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/certificates/count`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch certificate count: ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Certificate count fetch error:', error);
+      throw error;
+    }
+  },
+
+  async getBalance(walletAddress) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/wallet/${walletAddress}/balance`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch balance: ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Balance fetch error:', error);
+      throw error;
+    }
+  },
+};
 
 export default function AdminDashboard() {
   const router = useRouter();
+
+  // New state variables for the navbar
+  const [wallet, setWallet] = useState('Admin Wallet'); // Using a placeholder for admin
+  const [balance, setBalance] = useState(null);
+  const [certificateCount, setCertificateCount] = useState(0);
+  const [backendStatus, setBackendStatus] = useState(null);
+  const [shareSuccess, setShareSuccess] = useState(false); // Can be used for copy actions
+  const [loadingDashboard, setLoadingDashboard] = useState(true);
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
@@ -206,7 +280,7 @@ export default function AdminDashboard() {
       // Fetch contracts for the connected wallet (backend now filters by walletAddress)
       const response = await fetch(`${API_BASE_URL}/api/contracts/deployments?walletAddress=${walletAddress}`);
       const data = await response.json();
-      
+
       if (data.success && Array.isArray(data.contracts)) {
         // Backend already filters by deployer wallet address, no need for client-side filtering
         const processedContracts = data.contracts.map(contract => ({
@@ -379,10 +453,7 @@ export default function AdminDashboard() {
         await fetchContracts(); // Refresh contracts list
         setSuccess(`Contract deployed successfully! Address: ${contractAddress}`);
         setShowCreateContract(false);
-        setContractForm({
-          contractName: "",
-          networkName: "apothem",
-        });
+        setContractForm({ contractName: "", networkName: "apothem" });
       } else {
         setSuccess(`Contract deployed at ${contractAddress}, but failed to save to database`);
       }
@@ -427,8 +498,7 @@ export default function AdminDashboard() {
     setError(null);
     setMintingProgress(null);
 
-    // Find the selected contract to get its name
-    const selectedContract = contracts.find(contract => 
+    const selectedContract = contracts.find(contract =>
       (contract.contractAddress || contract.address) === mintForm.contractAddress
     );
     const contractName = selectedContract ? (selectedContract.contractName || selectedContract.name) : '';
@@ -790,6 +860,7 @@ export default function AdminDashboard() {
           )}
         </div>
       </header>
+      {/* End of New Header */}
 
       <main className="max-w-7xl mx-auto flex flex-col items-center">
         {!walletAddress ? (
@@ -1060,15 +1131,24 @@ export default function AdminDashboard() {
 
             {mintingProgress && Array.isArray(mintingProgress) && (
               <div className="mb-8 p-6 bg-gray-800 rounded-lg border border-gray-600">
-                <h3 className="text-xl font-bold mb-4 text-[#2cf2f9]">Minting Results</h3>
+                <h3 className="text-xl font-bold mb-4 text-[#2cf2f9]">
+                  Minting Results
+                </h3>
                 <div className="space-y-2 max-h-60 overflow-y-auto">
                   {mintingProgress.map((result, index) => (
-                    <div key={index} className={`p-3 rounded flex items-center justify-between ${
-                      result.success ? 'bg-green-900 text-green-100' : 'bg-red-900 text-red-100'
-                    }`}>
+                    <div
+                      key={index}
+                      className={`p-3 rounded flex items-center justify-between ${
+                        result.success
+                          ? "bg-green-900 text-green-100"
+                          : "bg-red-900 text-red-100"
+                      }`}
+                    >
                       <span>{result.participant}</span>
                       <span className="text-sm">
-                        {result.success ? `✓ Token ID: ${result.tokenId}` : `✗ ${result.error}`}
+                        {result.success
+                          ? `✓ Token ID: ${result.tokenId}`
+                          : `✗ ${result.error}`}
                       </span>
                     </div>
                   ))}
@@ -1082,8 +1162,11 @@ export default function AdminDashboard() {
         {showCreateContract && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-black p-8 rounded-lg max-w-md w-full border border-gray-600">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-bold text-white">Deploy New Contract</h3>
+              <FloatingPixels />
+              <div className="relative z-10 flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-white">
+                  Deploy New Contract
+                </h3>
                 <button
                   onClick={() => setShowCreateContract(false)}
                   className="text-gray-400 hover:text-white"
@@ -1091,8 +1174,11 @@ export default function AdminDashboard() {
                   <FaTimes />
                 </button>
               </div>
-              
-              <form onSubmit={deployContract} className="space-y-6">
+
+              <form
+                onSubmit={deployContract}
+                className="relative z-10 space-y-6"
+              >
                 <input
                   type="text"
                   name="contractName"
@@ -1110,7 +1196,7 @@ export default function AdminDashboard() {
                 >
                   <option value="apothem">XDC Apothem Testnet</option>
                 </select>
-                
+
                 <div className="flex gap-4">
                   <button
                     type="button"
@@ -1124,7 +1210,11 @@ export default function AdminDashboard() {
                     disabled={loading}
                     className="flex-1 py-3 px-6 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading ? <FaSpinner className="animate-spin mx-auto" /> : 'Deploy'}
+                    {loading ? (
+                      <FaSpinner className="animate-spin mx-auto" />
+                    ) : (
+                      "Deploy"
+                    )}
                   </button>
                 </div>
               </form>
@@ -1137,7 +1227,9 @@ export default function AdminDashboard() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-gray-900 p-8 rounded-lg max-w-4xl w-full border border-gray-600 max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-bold text-[#2cf2f9]">Mint Certificates</h3>
+                <h3 className="text-2xl font-bold text-[#2cf2f9]">
+                  Mint Certificates
+                </h3>
                 <button
                   onClick={() => {
                     setShowMintCertificates(false);
@@ -1199,8 +1291,15 @@ export default function AdminDashboard() {
                   >
                     <option value="">Select Contract</option>
                     {contracts.map((contract) => (
-                      <option key={contract.deploymentId || contract.contractAddress} value={contract.contractAddress || contract.address}>
-                        {contract.contractName || contract.name} ({(contract.contractAddress || contract.address)?.substring(0, 10)}...)
+                      <option
+                        key={contract.deploymentId || contract.contractAddress}
+                        value={contract.contractAddress || contract.address}
+                      >
+                        {contract.contractName || contract.name} (
+                        {(
+                          contract.contractAddress || contract.address
+                        )?.substring(0, 10)}
+                        ...)
                       </option>
                     ))}
                   </select>
