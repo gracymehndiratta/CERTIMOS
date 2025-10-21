@@ -125,7 +125,7 @@ export async function POST(request) {
 
     // Save deployment to our deployments API
     try {
-      const deploymentsResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:5000'}/api/contracts/deployments`, {
+      const deploymentsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/contracts/deployments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

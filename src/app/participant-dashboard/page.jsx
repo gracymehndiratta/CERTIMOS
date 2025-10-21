@@ -2,16 +2,9 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 
-// Backend API Configuration - Try multiple possible ports
-const POSSIBLE_BACKEND_URLS = [
-  "http://localhost:5000",
-  "http://localhost:3001", 
-  "http://127.0.0.1:5000"
-];
-
-// Auto-detect working backend URL
-let API_BASE_URL = "http://localhost:5000/api";
-let HEALTH_URL = "http://localhost:5000/health";
+// Backend API Configuration
+const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api`;
+const HEALTH_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/health`;
 
 // Helper function to resolve IPFS URLs
 function resolveIPFS(uri) {
@@ -42,7 +35,7 @@ async function fetchIPFSMetadata(tokenURI) {
     
     // Handle IPFS URLs
     const resolvedURL = resolveIPFS(tokenURI);
-    console.log('Fetching metadata from:', resolvedURL);
+    // Fetching metadata from resolved URL
     
     const response = await fetch(resolvedURL, { timeout: 10000 });
     if (!response.ok) {
@@ -51,7 +44,7 @@ async function fetchIPFSMetadata(tokenURI) {
     }
     
     const metadata = await response.json();
-    console.log('Fetched metadata:', metadata);
+    // Metadata fetched successfully
     return metadata;
   } catch (error) {
     console.error('Error fetching IPFS metadata:', error);
@@ -61,37 +54,32 @@ async function fetchIPFSMetadata(tokenURI) {
 
 // API Service functions
 const apiService = {
-  // Auto-detect working backend URL
-  async findWorkingBackend() {
-    for (const baseUrl of POSSIBLE_BACKEND_URLS) {
-      try {
-        const response = await fetch(`${baseUrl}/health`, { 
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          }
-        });
-        if (response.ok) {
-          API_BASE_URL = `${baseUrl}/api`;
-          HEALTH_URL = `${baseUrl}/health`;
-          return await response.json();
+  // Health check for backend
+  async checkBackendHealth() {
+    try {
+      const response = await fetch(HEALTH_URL, { 
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
         }
-      } catch (error) {
-        console.log(`Backend not available at ${baseUrl}:`, error.message);
-        continue;
+      });
+      if (response.ok) {
+        return await response.json();
       }
+      throw new Error(`Backend health check failed: ${response.status}`);
+    } catch (error) {
+      throw new Error(`Backend not available: ${error.message}`);
     }
-    throw new Error('No backend server found. Please start your backend server.');
   },
 
   // Get all certificates for a wallet with metadata - SIMPLIFIED VERSION
   async getCertificates(walletAddress) {
     try {
-      console.log(`🔍 Fetching certificates for wallet: ${walletAddress}`);
+      // Fetching certificates for wallet
       
       // 1. Get basic certificate data (fast - 2-5 seconds)
-      const response = await fetch(`${API_BASE_URL}/certificates/wallet/${walletAddress}`, {
+      const response = await fetch(`${API_BASE_URL}/certificates/wallet/${walletAddress}/multi-contract`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -107,7 +95,7 @@ const apiService = {
       }
       
       const data = await response.json();
-      console.log('📊 API Response:', data);
+      // API response received
       
       if (data.success && data.certificates) {
         // 2. Fetch metadata for certificates that have tokenURI (with limited concurrency)
@@ -265,9 +253,9 @@ export default function ParticipantDashboard() {
 
   const checkBackendHealth = async () => {
     try {
-      const health = await apiService.findWorkingBackend();
+      const health = await apiService.checkBackendHealth();
       setBackendStatus(health);
-      console.log('Backend found and working:', health);
+      // Backend found and working
     } catch (err) {
       console.error("No backend server found:", err.message);
       setBackendStatus({ status: "ERROR", message: err.message });
@@ -278,7 +266,7 @@ export default function ParticipantDashboard() {
     try {
       setLoading(true);
       setError(null);
-      console.log(`🔄 Starting data fetch for wallet: ${address}`);
+      // Starting data fetch for wallet
 
       // Ensure we're on the correct network
       await ensureCorrectNetwork();
@@ -286,7 +274,7 @@ export default function ParticipantDashboard() {
       // Check backend connectivity first
       try {
         await apiService.checkHealth();
-        console.log('✅ Backend is healthy');
+        // Backend is healthy
       } catch (healthError) {
         console.error('❌ Backend health check failed:', healthError);
         setError('Backend service is not available. Please try again later.');
@@ -305,7 +293,7 @@ export default function ParticipantDashboard() {
         const certsData = certificatesResponse.value;
         if (certsData.success) {
           const certs = certsData.certificates || [];
-          console.log('✅ Certificates with metadata:', certs);
+          // Certificates with metadata loaded
           setCertificates(certs);
 
           // ⭐ UPDATED: Set new valuation and breakdown data
@@ -331,7 +319,7 @@ export default function ParticipantDashboard() {
         const balanceData = balanceResponse.value;
         if (balanceData.success) {
           setBalance(balanceData.balance.formatted);
-          console.log('✅ Balance loaded:', balanceData.balance.formatted);
+          // Balance loaded successfully
         } else {
           console.warn('⚠️ Balance API failed, trying direct fetch');
           await fetchDirectBalance(address);
@@ -342,7 +330,7 @@ export default function ParticipantDashboard() {
       }
 
       setLoading(false);
-      console.log('✅ Wallet data fetch completed successfully');
+      // Wallet data fetch completed successfully
     } catch (err) {
       console.error("❌ Error fetching wallet data:", err);
       setError(`Failed to load dashboard data: ${err.message}`);
