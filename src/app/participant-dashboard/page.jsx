@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import DotGrid from "../components/ui/DotGrid";
+
 
 // Backend API Configuration
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api`;
@@ -625,20 +625,7 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
-      <div className="fixed top-0 left-0 w-full h-full z-0">
-        <DotGrid
-          dotSize={10}
-          gap={12}
-          baseColor="#271E37"
-          activeColor="#54D1DC"
-          proximity={120}
-          shockRadius={250}
-          shockStrength={5}
-          resistance={750}
-          returnDuration={1.5}
-          className="w-full h-full"
-        />
-      </div>
+   
 
       {/* Header */}
       <header className="border-b border-gray-800 bg-black/50 backdrop-blur-sm sticky top-0 z-10">

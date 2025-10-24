@@ -67,27 +67,8 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Desktop Dashboard Buttons */}
-          <div className="hidden md:flex ml-auto gap-3">
-            <motion.a
-              href="/participant-dashboard"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3 }}
-              className="px-4 py-2 bg-[#54D1DC] text-black rounded-full font-semibold hover:bg-[#4CC5D0] transition-all duration-200 text-sm"
-            >
-              User Dashboard
-            </motion.a>
-            <motion.a
-              href="/AdminDashboard"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4 }}
-              className="px-4 py-2 bg-white text-black rounded-full font-semibold hover:bg-gray-100 transition-all duration-200 text-sm"
-            >
-              Admin Dashboard
-            </motion.a>
-          </div>
+         
+          
 
           {/* Mobile Menu Button */}
           <button
@@ -158,29 +139,6 @@ export default function Navbar() {
                     {label}
                   </motion.a>
                 ))}
-
-                <div className="space-y-3 pt-4">
-                  <motion.a
-                    href="/participant-dashboard"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="block w-full text-center px-6 py-3 bg-[#54D1DC] text-black rounded-full shadow-lg hover:bg-[#4CC5D0] transition-all duration-200 font-bold text-lg"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    User Dashboard
-                  </motion.a>
-                  <motion.a
-                    href="/AdminDashboard"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="block w-full text-center px-6 py-3 bg-white text-black rounded-full shadow-lg hover:bg-gray-100 transition-all duration-200 font-bold text-lg"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Admin Dashboard
-                  </motion.a>
-                </div>
               </div>
             </motion.div>
           </motion.div>

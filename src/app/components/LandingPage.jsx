@@ -9,7 +9,7 @@ export default function LandingPage() {
   const [showModal, setShowModal] = useState(false);
 
   const handleAdminAccess = () => {
-    // Direct access to admin dashboard - no authentication required
+    
     router.push("/AdminDashboard");
   };
 
