@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 
-
 // Backend API Configuration
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api`;
 const HEALTH_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/health`;
@@ -20,35 +19,35 @@ function resolveIPFS(uri) {
 async function fetchIPFSMetadata(tokenURI) {
   try {
     if (!tokenURI) return null;
-    
-    if (tokenURI.startsWith('http')) {
+
+    if (tokenURI.startsWith("http")) {
       const response = await fetch(tokenURI, { timeout: 10000 });
       if (!response.ok) {
         console.warn(`Failed to fetch metadata: ${response.status}`);
         return null;
       }
       return await response.json();
-    } else if (tokenURI.startsWith('data:application/json')) {
-      const base64Data = tokenURI.split(',')[1];
+    } else if (tokenURI.startsWith("data:application/json")) {
+      const base64Data = tokenURI.split(",")[1];
       const jsonString = atob(base64Data);
       return JSON.parse(jsonString);
     }
-    
+
     // Handle IPFS URLs
     const resolvedURL = resolveIPFS(tokenURI);
     // Fetching metadata from resolved URL
-    
+
     const response = await fetch(resolvedURL, { timeout: 10000 });
     if (!response.ok) {
       console.warn(`Failed to fetch metadata: ${response.status}`);
       return null;
     }
-    
+
     const metadata = await response.json();
     // Metadata fetched successfully
     return metadata;
   } catch (error) {
-    console.error('Error fetching IPFS metadata:', error);
+    console.error("Error fetching IPFS metadata:", error);
     return null;
   }
 }
@@ -58,12 +57,12 @@ const apiService = {
   // Health check for backend
   async checkBackendHealth() {
     try {
-      const response = await fetch(HEALTH_URL, { 
-        method: 'GET',
+      const response = await fetch(HEALTH_URL, {
+        method: "GET",
         headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        }
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
       });
       if (response.ok) {
         return await response.json();
@@ -78,26 +77,31 @@ const apiService = {
   async getCertificates(walletAddress) {
     try {
       // Fetching certificates for wallet
-      
+
       // 1. Get basic certificate data (fast - 2-5 seconds)
-      const response = await fetch(`${API_BASE_URL}/certificates/wallet/${walletAddress}/multi-contract`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        timeout: 15000 // Reduce from 30s to 15s
-      });
-      
+      const response = await fetch(
+        `${API_BASE_URL}/certificates/wallet/${walletAddress}/multi-contract`,
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          timeout: 15000, // Reduce from 30s to 15s
+        }
+      );
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`API Error: ${response.status} - ${errorText}`);
-        throw new Error(`Failed to fetch certificates: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Failed to fetch certificates: ${response.status} ${response.statusText}`
+        );
       }
-      
+
       const data = await response.json();
       // API response received
-      
+
       if (data.success && data.certificates) {
         // 2. Fetch metadata for certificates that have tokenURI (with limited concurrency)
         const certificatesWithMetadata = await Promise.all(
@@ -109,9 +113,11 @@ const apiService = {
             try {
               // Add delay for IPFS requests to avoid rate limiting
               if (index > 0) {
-                await new Promise(resolve => setTimeout(resolve, 100 * index));
+                await new Promise((resolve) =>
+                  setTimeout(resolve, 100 * index)
+                );
               }
-              
+
               const metadata = await fetchIPFSMetadata(cert.tokenURI);
               return {
                 ...cert,
@@ -119,24 +125,27 @@ const apiService = {
                 name: metadata?.name || cert.name,
                 description: metadata?.description || cert.description,
                 image: metadata?.image || cert.image,
-                attributes: metadata?.attributes || cert.attributes
+                attributes: metadata?.attributes || cert.attributes,
               };
             } catch (error) {
-              console.error(`Failed to fetch metadata for token ${cert.tokenId}:`, error);
+              console.error(
+                `Failed to fetch metadata for token ${cert.tokenId}:`,
+                error
+              );
               return cert; // Return original cert if metadata fails
             }
           })
         );
-        
+
         return {
           ...data,
-          certificates: certificatesWithMetadata
+          certificates: certificatesWithMetadata,
         };
       }
-      
+
       return data;
     } catch (error) {
-      console.error('Certificate fetch error:', error);
+      console.error("Certificate fetch error:", error);
       throw error;
     }
   },
@@ -144,19 +153,24 @@ const apiService = {
   // Get XDC balance for a wallet
   async getBalance(walletAddress) {
     try {
-      const response = await fetch(`${API_BASE_URL}/wallet/${walletAddress}/balance`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${API_BASE_URL}/wallet/${walletAddress}/balance`,
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
       if (!response.ok) {
-        throw new Error(`Failed to fetch balance: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Failed to fetch balance: ${response.status} ${response.statusText}`
+        );
       }
       return response.json();
     } catch (error) {
-      console.error('Balance fetch error:', error);
+      console.error("Balance fetch error:", error);
       throw error;
     }
   },
@@ -164,11 +178,11 @@ const apiService = {
   // Verify a certificate by token ID
   async verifyCertificate(tokenId) {
     const response = await fetch(`${API_BASE_URL}/verify/${tokenId}`, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      }
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
     });
     if (!response.ok) {
       throw new Error(`Failed to verify certificate: ${response.statusText}`);
@@ -179,17 +193,17 @@ const apiService = {
   // Check backend health
   async checkHealth() {
     const response = await fetch(HEALTH_URL, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      }
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
     });
     if (!response.ok) {
       throw new Error(`Backend health check failed: ${response.statusText}`);
     }
     return response.json();
-  }
+  },
 };
 
 export default function ParticipantDashboard() {
@@ -203,7 +217,7 @@ export default function ParticipantDashboard() {
   const [error, setError] = useState(null);
   const [selectedCertificate, setSelectedCertificate] = useState(null);
   const [backendStatus, setBackendStatus] = useState(null);
-  const [contractAddress, setContractAddress] = useState(''); // Removed hardcoded address
+  const [contractAddress, setContractAddress] = useState(""); // Removed hardcoded address
   const [shareSuccess, setShareSuccess] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
@@ -213,11 +227,11 @@ export default function ParticipantDashboard() {
 
   // 🎭 NEW: Styles for rarity levels
   const rarityStyles = {
-    Legendary: 'bg-yellow-500 border-yellow-400 text-black',
-    Epic: 'bg-purple-600 border-purple-500 text-white',
-    Rare: 'bg-blue-600 border-blue-500 text-white',
-    Uncommon: 'bg-green-600 border-green-500 text-white',
-    Common: 'bg-gray-600 border-gray-500 text-white',
+    Legendary: "bg-yellow-500 border-yellow-400 text-black",
+    Epic: "bg-purple-600 border-purple-500 text-white",
+    Rare: "bg-blue-600 border-blue-500 text-white",
+    Uncommon: "bg-green-600 border-green-500 text-white",
+    Common: "bg-gray-600 border-gray-500 text-white",
   };
 
   useEffect(() => {
@@ -235,11 +249,13 @@ export default function ParticipantDashboard() {
 
     const storedWallet = localStorage.getItem("walletAddress");
     if (!storedWallet) {
-      setError("No wallet connected! Please connect your wallet from the home page first.");
+      setError(
+        "No wallet connected! Please connect your wallet from the home page first."
+      );
       setLoading(false);
       return;
     }
-    
+
     // Validate wallet address format
     if (!storedWallet.match(/^0x[a-fA-F0-9]{40}$/)) {
       setError("Invalid wallet address format. Please reconnect your wallet.");
@@ -247,7 +263,7 @@ export default function ParticipantDashboard() {
       setLoading(false);
       return;
     }
-    
+
     setWallet(storedWallet);
     fetchWalletData(storedWallet);
   }, [isClient]);
@@ -277,8 +293,8 @@ export default function ParticipantDashboard() {
         await apiService.checkHealth();
         // Backend is healthy
       } catch (healthError) {
-        console.error('❌ Backend health check failed:', healthError);
-        setError('Backend service is not available. Please try again later.');
+        console.error("❌ Backend health check failed:", healthError);
+        setError("Backend service is not available. Please try again later.");
         setLoading(false);
         return;
       }
@@ -286,11 +302,11 @@ export default function ParticipantDashboard() {
       // Fetch certificates and balance in parallel
       const [certificatesResponse, balanceResponse] = await Promise.allSettled([
         apiService.getCertificates(address),
-        apiService.getBalance(address)
+        apiService.getBalance(address),
       ]);
 
       // Handle certificates response
-      if (certificatesResponse.status === 'fulfilled') {
+      if (certificatesResponse.status === "fulfilled") {
         const certsData = certificatesResponse.value;
         if (certsData.success) {
           const certs = certsData.certificates || [];
@@ -298,17 +314,27 @@ export default function ParticipantDashboard() {
           setCertificates(certs);
 
           // ⭐ UPDATED: Set new valuation and breakdown data
-          setCertificateCount(certsData.valueBreakdown?.totalCertificates || certsData.count || certs.length);
+          setCertificateCount(
+            certsData.valueBreakdown?.totalCertificates ||
+              certsData.count ||
+              certs.length
+          );
           setTotalPoints(certsData.totalPoints || 0);
           setValueBreakdown(certsData.valueBreakdown || null);
-
         } else {
-          console.error('❌ Certificate API returned error:', certsData.error);
-          throw new Error(certsData.error || 'Failed to fetch certificates');
+          console.error("❌ Certificate API returned error:", certsData.error);
+          throw new Error(certsData.error || "Failed to fetch certificates");
         }
       } else {
-        console.error('❌ Certificates fetch failed:', certificatesResponse.reason);
-        setError(`Failed to load certificates: ${certificatesResponse.reason?.message || 'Unknown error'}`);
+        console.error(
+          "❌ Certificates fetch failed:",
+          certificatesResponse.reason
+        );
+        setError(
+          `Failed to load certificates: ${
+            certificatesResponse.reason?.message || "Unknown error"
+          }`
+        );
         setCertificates([]);
         setCertificateCount(0);
         setTotalPoints(0);
@@ -316,17 +342,17 @@ export default function ParticipantDashboard() {
       }
 
       // Handle balance response
-      if (balanceResponse.status === 'fulfilled') {
+      if (balanceResponse.status === "fulfilled") {
         const balanceData = balanceResponse.value;
         if (balanceData.success) {
           setBalance(balanceData.balance.formatted);
           // Balance loaded successfully
         } else {
-          console.warn('⚠️ Balance API failed, trying direct fetch');
+          console.warn("⚠️ Balance API failed, trying direct fetch");
           await fetchDirectBalance(address);
         }
       } else {
-        console.error('❌ Balance fetch failed:', balanceResponse.reason);
+        console.error("❌ Balance fetch failed:", balanceResponse.reason);
         await fetchDirectBalance(address);
       }
 
@@ -393,30 +419,32 @@ export default function ParticipantDashboard() {
   };
 
   const handleConnectWallet = () => {
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   const handleLogout = () => {
     // Clear all stored wallet data
     localStorage.removeItem("walletAddress");
-    
+
     // Optionally try to disconnect from MetaMask (not all wallets support this)
     if (window.ethereum && window.ethereum.request) {
       try {
         // Some wallets support wallet_revokePermissions
-        window.ethereum.request({
-          method: "wallet_revokePermissions",
-          params: [{ eth_accounts: {} }]
-        }).catch(() => {
-          // Ignore errors if not supported
-        });
+        window.ethereum
+          .request({
+            method: "wallet_revokePermissions",
+            params: [{ eth_accounts: {} }],
+          })
+          .catch(() => {
+            // Ignore errors if not supported
+          });
       } catch (error) {
         // Ignore errors
       }
     }
-    
+
     // Redirect to home page
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   const refreshData = () => {
@@ -427,19 +455,20 @@ export default function ParticipantDashboard() {
 
   // Enhanced button handlers
   const handleViewContract = () => {
-    const url = 'https://testnet.xdcscan.com/address/0x9b40c3c0656434fd89bC50671a29d1814EDA8079';
-    console.log('Opening contract URL:', url);
-    window.open(url, '_blank', 'noopener,noreferrer');
+    const url =
+      "https://testnet.xdcscan.com/address/0x9b40c3c0656434fd89bC50671a29d1814EDA8079";
+    console.log("Opening contract URL:", url);
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const handleViewTokenDetails = (tokenId) => {
     const url = `https://testnet.xdcscan.com/token/${contractAddress}/${tokenId}`;
-    console.log('Opening token URL:', url);
-    window.open(url, '_blank', 'noopener,noreferrer');
+    console.log("Opening token URL:", url);
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const handleShareCertificate = (certificate) => {
-    console.log('Opening share modal for certificate:', certificate.tokenId);
+    console.log("Opening share modal for certificate:", certificate.tokenId);
     setShowShareModal(true);
   };
 
@@ -450,34 +479,56 @@ export default function ParticipantDashboard() {
   const shareToLinkedIn = (certificate) => {
     const certName = getCertificateName(certificate);
     const eventName = getEventName(certificate);
-    
-    const shareText = `🎓 I've earned a blockchain certificate: ${certName}${eventName ? ` from ${eventName}` : ''}!\n\nThis ${getCertificateRarity(certificate)} certificate is worth ${getCertificatePoints(certificate)} points and is verified on the XDC Network.\n\nToken ID: #${certificate.tokenId}\n\n#BlockchainEducation #Certificate #XDC #Achievement #NFT`;
+
+    const shareText = `🎓 I've earned a blockchain certificate: ${certName}${
+      eventName ? ` from ${eventName}` : ""
+    }!\n\nThis ${getCertificateRarity(
+      certificate
+    )} certificate is worth ${getCertificatePoints(
+      certificate
+    )} points and is verified on the XDC Network.\n\nToken ID: #${
+      certificate.tokenId
+    }\n\n#BlockchainEducation #Certificate #XDC #Achievement #NFT`;
     const shareUrl = `https://testnet.xdcscan.com/token/${contractAddress}/${certificate.tokenId}`;
-    
-    const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
-    
-    window.open(linkedInUrl, '_blank', 'width=600,height=400');
+
+    const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+      shareUrl
+    )}&text=${encodeURIComponent(shareText)}`;
+
+    window.open(linkedInUrl, "_blank", "width=600,height=400");
     setShowShareModal(false);
   };
 
   const shareToTwitter = (certificate) => {
     const certName = getCertificateName(certificate);
     const eventName = getEventName(certificate);
-    
-    const shareText = `🎓 Just earned my ${getCertificateRarity(certificate)} blockchain certificate: ${certName}${eventName ? ` from ${eventName}` : ''}! Worth ${getCertificatePoints(certificate)} points. Verified on @XDCFoundation Network. Token #${certificate.tokenId} #BlockchainEducation #Certificate #XDC`;
+
+    const shareText = `🎓 Just earned my ${getCertificateRarity(
+      certificate
+    )} blockchain certificate: ${certName}${
+      eventName ? ` from ${eventName}` : ""
+    }! Worth ${getCertificatePoints(
+      certificate
+    )} points. Verified on @XDCFoundation Network. Token #${
+      certificate.tokenId
+    } #BlockchainEducation #Certificate #XDC`;
     const shareUrl = `https://testnet.xdcscan.com/token/${contractAddress}/${certificate.tokenId}`;
-    
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
-    
-    window.open(twitterUrl, '_blank', 'width=600,height=400');
+
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+      shareText
+    )}&url=${encodeURIComponent(shareUrl)}`;
+
+    window.open(twitterUrl, "_blank", "width=600,height=400");
     setShowShareModal(false);
   };
 
   const shareToFacebook = (certificate) => {
     const shareUrl = `https://testnet.xdcscan.com/token/${contractAddress}/${certificate.tokenId}`;
-    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-    
-    window.open(facebookUrl, '_blank', 'width=600,height=400');
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+      shareUrl
+    )}`;
+
+    window.open(facebookUrl, "_blank", "width=600,height=400");
     setShowShareModal(false);
   };
 
@@ -485,19 +536,21 @@ export default function ParticipantDashboard() {
     const certName = getCertificateName(certificate);
     const eventName = getEventName(certificate);
     const recipientName = getRecipientName(certificate);
-    
+
     const shareText = `🎓 Blockchain Certificate Achievement
 
 Certificate: ${certName}
-${eventName ? `Event: ${eventName}` : ''}
-${recipientName ? `Recipient: ${recipientName}` : ''}
+${eventName ? `Event: ${eventName}` : ""}
+${recipientName ? `Recipient: ${recipientName}` : ""}
 
 Rarity: ${getCertificateRarity(certificate)}
 Category: ${getCertificateCategory(certificate)}
 Points: ${getCertificatePoints(certificate)}
 Token ID: #${certificate.tokenId}
 
-Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${certificate.tokenId}
+Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${
+      certificate.tokenId
+    }
 
 #BlockchainEducation #Certificate #XDC #Achievement`;
 
@@ -507,13 +560,13 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
       setTimeout(() => setShareSuccess(false), 3000);
       setShowShareModal(false);
     } catch (error) {
-      console.error('Failed to copy:', error);
+      console.error("Failed to copy:", error);
       // Fallback for older browsers
-      const textArea = document.createElement('textarea');
+      const textArea = document.createElement("textarea");
       textArea.value = shareText;
       document.body.appendChild(textArea);
       textArea.select();
-      document.execCommand('copy');
+      document.execCommand("copy");
       document.body.removeChild(textArea);
       setShareSuccess(true);
       setTimeout(() => setShareSuccess(false), 3000);
@@ -531,7 +584,7 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
   };
 
   const getCertificateDescription = (cert) => {
-    return cert.description || cert.metadata?.description || '';
+    return cert.description || cert.metadata?.description || "";
   };
 
   const getCertificateAttributes = (cert) => {
@@ -540,42 +593,61 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
 
   // ⭐ NEW: Helpers for valuation data
   const getCertificatePoints = (cert) => cert.points || 0;
-  const getCertificateRarity = (cert) => cert.rarity || 'Common';
-  const getCertificateCategory = (cert) => cert.category || 'General';
-
+  const getCertificateRarity = (cert) => cert.rarity || "Common";
+  const getCertificateCategory = (cert) => cert.category || "General";
 
   const getEventName = (cert) => {
-    return cert.event_name || cert.metadata?.event_name || 
-           getCertificateAttributes(cert).find(attr => attr.trait_type === 'Event')?.value || '';
+    return (
+      cert.event_name ||
+      cert.metadata?.event_name ||
+      getCertificateAttributes(cert).find((attr) => attr.trait_type === "Event")
+        ?.value ||
+      ""
+    );
   };
 
   const getRecipientName = (cert) => {
-    return cert.recipient_name || cert.metadata?.recipient_name || 
-           getCertificateAttributes(cert).find(attr => attr.trait_type === 'Recipient')?.value || '';
+    return (
+      cert.recipient_name ||
+      cert.metadata?.recipient_name ||
+      getCertificateAttributes(cert).find(
+        (attr) => attr.trait_type === "Recipient"
+      )?.value ||
+      ""
+    );
   };
 
   const getDateIssued = (cert) => {
-    return cert.date_issued || cert.metadata?.date_issued || 
-           getCertificateAttributes(cert).find(attr => attr.trait_type === 'Date Issued')?.value || '';
+    return (
+      cert.date_issued ||
+      cert.metadata?.date_issued ||
+      getCertificateAttributes(cert).find(
+        (attr) => attr.trait_type === "Date Issued"
+      )?.value ||
+      ""
+    );
   };
 
   const getCertificateLevel = (cert) => {
-    return getCertificateAttributes(cert).find(attr => attr.trait_type === 'Level')?.value || '';
+    return (
+      getCertificateAttributes(cert).find((attr) => attr.trait_type === "Level")
+        ?.value || ""
+    );
   };
 
   const getSkills = (cert) => {
     return getCertificateAttributes(cert)
-      .filter(attr => attr.trait_type.startsWith('Skill'))
-      .map(attr => attr.value);
+      .filter((attr) => attr.trait_type.startsWith("Skill"))
+      .map((attr) => attr.value);
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return "";
     try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+      return new Date(dateString).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       });
     } catch {
       return dateString;
@@ -589,7 +661,9 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
         <div className="text-center p-8 bg-gray-800 rounded-2xl shadow-2xl">
           <div className="text-6xl mb-4">🦊</div>
           <h1 className="text-2xl font-bold mb-4">MetaMask Required</h1>
-          <p className="text-gray-300 mb-6">Please install MetaMask to access your dashboard.</p>
+          <p className="text-gray-300 mb-6">
+            Please install MetaMask to access your dashboard.
+          </p>
           <a
             href="https://metamask.io/download/"
             target="_blank"
@@ -608,9 +682,11 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white flex items-center justify-center">
         <div className="text-center p-8 bg-gray-800 rounded-2xl shadow-2xl">
           <div className="text-6xl mb-4">🔒</div>
-          <h1 className="text-2xl font-bold mb-4">{error ? 'Connection Error' : 'No Wallet Connected'}</h1>
+          <h1 className="text-2xl font-bold mb-4">
+            {error ? "Connection Error" : "No Wallet Connected"}
+          </h1>
           <p className="text-gray-300 mb-6">
-            {error || 'Please connect your wallet to access your dashboard.'}
+            {error || "Please connect your wallet to access your dashboard."}
           </p>
           <button
             onClick={handleConnectWallet}
@@ -625,25 +701,23 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
-   
-
       {/* Header */}
-      <header className="border-b border-gray-800 bg-black/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div>
+      <header className="border-b border-gray-800 bg-black/80 backdrop-blur-md sticky top-0 z-50 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex-1 min-w-0">
               {/* Gradient animated heading */}
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-[#54D1DC] via-blue-400 to-[#54D1DC] bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-x">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-[#54D1DC] via-blue-400 to-[#54D1DC] bg-[length:200%_200%] bg-clip-text text-transparent animate-gradient-x truncate">
                 Certificate Dashboard
               </h1>
 
               {/* Wallet with fade + slide in */}
-              <p className="text-gray-400 text-sm mt-1 animate-fade-in">
+              <p className="text-gray-400 text-xs sm:text-sm mt-1 animate-fade-in truncate">
                 Wallet: {wallet.slice(0, 6)}...{wallet.slice(-4)}
               </p>
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3 sm:gap-6 flex-shrink-0">
               {/* Backend Status */}
 
               {backendStatus && (
@@ -714,30 +788,14 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
               )}
 
               {/* Balance Display */}
-              <div className="bg-transparent rounded-lg px-4 py-2">
-                <div className="text-sm text-gray-400">XDC Balance</div>
-                <div className="text-lg font-bold text-[#54D1DC]">
+              <div className="bg-transparent rounded-lg px-2 sm:px-4 py-2">
+                <div className="text-xs sm:text-sm text-gray-400">
+                  XDC Balance
+                </div>
+                <div className="text-sm sm:text-lg font-bold text-[#54D1DC] truncate">
                   {balance
                     ? `${parseFloat(balance).toFixed(4)} XDC`
                     : "Loading..."}
-                </div>
-              </div>
-
-              {/* Certificate Count */}
-              <div className="relative group bg-transparent rounded-2xl px-6 py-4 overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105">
-                {/* Animated glowing border */}
-                <div className="absolute inset-0 text-lg  opacity-50 blur-xl "></div>
-
-                <div className="relative z-10">
-                  {/* Shimmer title */}
-                  <div className="text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300 animate-shimmer">
-                    Certificates
-                  </div>
-
-                  {/* Animated number */}
-                  <div className="text-2xl font-extrabold text-green-400 animate-glow animate-bounce-in">
-                    {certificateCount}
-                  </div>
                 </div>
               </div>
 
@@ -745,7 +803,7 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
               <button
                 onClick={refreshData}
                 disabled={loading}
-                className="bg-gray-700 hover:bg-gray-600 p-2 rounded-lg transition-colors disabled:opacity-50"
+                className="bg-gray-700 hover:bg-gray-600 p-2 rounded-lg transition-colors disabled:opacity-50 flex-shrink-0"
                 title="Refresh Data"
               >
                 <svg
@@ -776,7 +834,7 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
         </div>
       </header>
 
-      <main className="max-w-7xl z-50 mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Error Display */}
         {error && (
           <div className="mb-8 bg-red-900/50 border border-red-500 rounded-lg p-4">
@@ -794,36 +852,68 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
         {!loading && valueBreakdown && (
           <section className="mb-10">
             <h2 className="text-2xl font-bold mb-4">Your Statistics</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {/* Total Certificates */}
+              <div className="bg-gray-800 p-4 sm:p-6 rounded-xl border border-gray-700">
+                <h3 className="text-gray-400 text-xs sm:text-sm font-medium mb-1">
+                  Total Certificates
+                </h3>
+                <p className="text-2xl sm:text-3xl font-bold text-green-400">
+                  {certificateCount}
+                </p>
+                <p className="text-gray-500 text-xs">certificates earned</p>
+              </div>
               {/* Average Points */}
-              <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                <h3 className="text-gray-400 text-sm font-medium mb-1">Average Value</h3>
-                <p className="text-3xl font-bold text-yellow-400">{valueBreakdown.averagePoints.toFixed(0)} PTS</p>
+              <div className="bg-gray-800 p-4 sm:p-6 rounded-xl border border-gray-700">
+                <h3 className="text-gray-400 text-xs sm:text-sm font-medium mb-1">
+                  Average Value
+                </h3>
+                <p className="text-2xl sm:text-3xl font-bold text-yellow-400">
+                  {valueBreakdown.averagePoints.toFixed(0)} PTS
+                </p>
                 <p className="text-gray-500 text-xs">per certificate</p>
               </div>
               {/* Rarity Distribution */}
-              <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                 <h3 className="text-gray-400 text-sm font-medium mb-2">Rarity Distribution</h3>
-                 <div className="space-y-2">
-                   {Object.entries(valueBreakdown.rarityDistribution).map(([rarity, count]) => (
-                     <div key={rarity} className="flex justify-between items-center text-sm">
-                       <span className={`${rarityStyles[rarity]} px-2 py-0.5 rounded text-xs font-semibold border`}>{rarity}</span>
-                       <span className="font-bold text-white">{count}</span>
-                     </div>
-                   ))}
-                 </div>
+              <div className="bg-gray-800 p-4 sm:p-6 rounded-xl border border-gray-700">
+                <h3 className="text-gray-400 text-xs sm:text-sm font-medium mb-2">
+                  Rarity Distribution
+                </h3>
+                <div className="space-y-2">
+                  {Object.entries(valueBreakdown.rarityDistribution).map(
+                    ([rarity, count]) => (
+                      <div
+                        key={rarity}
+                        className="flex justify-between items-center text-sm"
+                      >
+                        <span
+                          className={`${rarityStyles[rarity]} px-2 py-0.5 rounded text-xs font-semibold border`}
+                        >
+                          {rarity}
+                        </span>
+                        <span className="font-bold text-white">{count}</span>
+                      </div>
+                    )
+                  )}
+                </div>
               </div>
               {/* Category Distribution */}
-              <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                 <h3 className="text-gray-400 text-sm font-medium mb-2">Category Distribution</h3>
-                 <div className="space-y-2">
-                   {Object.entries(valueBreakdown.categoryDistribution).map(([category, count]) => (
-                     <div key={category} className="flex justify-between items-center text-sm">
-                       <span className="text-gray-300">{category}</span>
-                       <span className="font-bold text-white">{count}</span>
-                     </div>
-                   ))}
-                 </div>
+              <div className="bg-gray-800 p-4 sm:p-6 rounded-xl border border-gray-700">
+                <h3 className="text-gray-400 text-xs sm:text-sm font-medium mb-2">
+                  Category Distribution
+                </h3>
+                <div className="space-y-2">
+                  {Object.entries(valueBreakdown.categoryDistribution).map(
+                    ([category, count]) => (
+                      <div
+                        key={category}
+                        className="flex justify-between items-center text-sm"
+                      >
+                        <span className="text-gray-300">{category}</span>
+                        <span className="font-bold text-white">{count}</span>
+                      </div>
+                    )
+                  )}
+                </div>
               </div>
             </div>
           </section>
@@ -831,8 +921,8 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
 
         {/* Certificates Section */}
         <section>
-          <div className="flex justify-between items-center z-50 mb-8">
-            <h2 className="text-2xl z-50 font-bold bg-gradient-to-r from-[#54D1DC] to-blue-400 bg-clip-text text-transparent animate-gradient-x">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-[#54D1DC] to-blue-400 bg-clip-text text-transparent animate-gradient-x">
               Your Certificates
             </h2>
             {!loading && certificates.length > 0 && (
@@ -844,7 +934,7 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
           </div>
 
           {loading ? (
-            <div className=" z-50 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {[...Array(3)].map((_, i) => (
                 <div
                   key={i}
@@ -875,13 +965,13 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
               </button>
             </div>
           ) : (
-            <div className="z-50 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {certificates.map((cert, idx) => (
                 <div
                   key={cert.tokenId}
                   onClick={() => handleCertificateClick(cert)}
                   style={{ animationDelay: `${idx * 150}ms` }}
-                  className="bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-700 cursor-pointer 
+                  className="bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 border border-gray-700 cursor-pointer 
                      transform transition-all duration-500 animate-fade-up 
                      hover:scale-105 hover:rotate-1 hover:shadow-2xl hover:border-[#54D1DC]/60"
                 >
@@ -893,14 +983,15 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                         "/placeholder-certificate.png"
                       }
                       alt={getCertificateName(cert)}
-                      className="w-full h-48 object-contain rounded-lg bg-gray-700 transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-32 sm:h-48 object-contain rounded-lg bg-gray-700 transition-transform duration-500 group-hover:scale-105"
                       onError={(e) => {
-                        console.log('Image failed to load:', e.target.src);
+                        console.log("Image failed to load:", e.target.src);
                         // Set a data URL placeholder if file doesn't exist
-                        e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDIwMCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTUwIiBmaWxsPSIjMzc0MTUxIi8+CjxwYXRoIGQ9Ik0xMDAgNzVDMTEwLjQ5MyA3NSAxMTkgNjYuNDkzNCAxMTkgNTZDMTE5IDQ1LjUwNjYgMTEwLjQ5MyAzNyAxMDAgMzdDODkuNTA2NiAzNyA4MSA0NS41MDY2IDgxIDU2QzgxIDY2LjQ5MzQgODkuNTA2NiA3NSAxMDAgNzVaIiBmaWxsPSIjNkI3Mjg4Ii8+CjxwYXRoIGQ9Ik01MCA5OUM1MCA5NSA1My40IDg5IDYwIDg5SDEwMEgxNDBDMTQ2LjYgODkgMTUwIDk1IDE1MCA5OVYxMTNINTBWOTlaIiBmaWxsPSIjNkI3Mjg4Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTMwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOUI5Q0E0IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiPkNlcnRpZmljYXRlPC90ZXh0Pgo8L3N2Zz4K';
+                        e.target.src =
+                          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDIwMCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTUwIiBmaWxsPSIjMzc0MTUxIi8+CjxwYXRoIGQ9Ik0xMDAgNzVDMTEwLjQ5MyA3NSAxMTkgNjYuNDkzNCAxMTkgNTZDMTE5IDQ1LjUwNjYgMTEwLjQ5MyAzNyAxMDAgMzdDODkuNTA2NiAzNyA4MSA0NS41MDY2IDgxIDU2QzgxIDY2LjQ5MzQgODkuNTA2NiA3NSAxMDAgNzVaIiBmaWxsPSIjNkI3Mjg4Ii8+CjxwYXRoIGQ9Ik01MCA5OUM1MCA5NSA1My40IDg5IDYwIDg5SDEwMEgxNDBDMTQ2LjYgODkgMTUwIDk1IDE1MCA5OVYxMTNINTBWOTlaIiBmaWxsPSIjNkI3Mjg4Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTMwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOUI5Q0E0IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiPkNlcnRpZmljYXRlPC90ZXh0Pgo8L3N2Zz4K";
                       }}
                       onLoad={(e) => {
-                        console.log('Image loaded successfully:', e.target.src);
+                        console.log("Image loaded successfully:", e.target.src);
                       }}
                     />
                     <div
@@ -1069,12 +1160,16 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                     alt={getCertificateName(selectedCertificate)}
                     className="w-full h-80 object-cover rounded-lg bg-gray-700"
                     onError={(e) => {
-                      console.log('Modal image failed to load:', e.target.src);
+                      console.log("Modal image failed to load:", e.target.src);
                       // Set a data URL placeholder
-                      e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDIwMCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTUwIiBmaWxsPSIjMzc0MTUxIi8+CjxwYXRoIGQ9Ik0xMDAgNzVDMTEwLjQ5MyA3NSAxMTkgNjYuNDkzNCAxMTkgNTZDMTE5IDQ1LjUwNjYgMTEwLjQ5MyAzNyAxMDAgMzdDODkuNTA2NiAzNyA4MSA0NS41MDY2IDgxIDU2QzgxIDY2LjQ5MzQgODkuNTA2NiA3NSAxMDAgNzVaIiBmaWxsPSIjNkI3Mjg4Ii8+CjxwYXRoIGQ9Ik01MCA5OUM1MCA5NSA1My40IDg5IDYwIDg5SDEwMEgxNDBDMTQ2LjYgODkgMTUwIDk1IDE1MCA5OVYxMTNINTBWOTlaIiBmaWxsPSIjNkI3Mjg4Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTMwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOUI5Q0E0IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiPkNlcnRpZmljYXRlPC90ZXh0Pgo8L3N2Zz4K';
+                      e.target.src =
+                        "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDIwMCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTUwIiBmaWxsPSIjMzc0MTUxIi8+CjxwYXRoIGQ9Ik0xMDAgNzVDMTEwLjQ5MyA3NSAxMTkgNjYuNDkzNCAxMTkgNTZDMTE5IDQ1LjUwNjYgMTEwLjQ5MyAzNyAxMDAgMzdDODkuNTA2NiAzNyA4MSA0NS41MDY2IDgxIDU2QzgxIDY2LjQ5MzQgODkuNTA2NiA3NSAxMDAgNzVaIiBmaWxsPSIjNkI3Mjg4Ii8+CjxwYXRoIGQ9Ik01MCA5OUM1MCA5NSA1My40IDg5IDYwIDg5SDEwMEgxNDBDMTQ2LjYgODkgMTUwIDk1IDE1MCA5OVYxMTNINTBWOTlaIiBmaWxsPSIjNkI3Mjg4Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTMwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOUI5Q0E0IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiPkNlcnRpZmljYXRlPC90ZXh0Pgo8L3N2Zz4K";
                     }}
                     onLoad={(e) => {
-                      console.log('Modal image loaded successfully:', e.target.src);
+                      console.log(
+                        "Modal image loaded successfully:",
+                        e.target.src
+                      );
                     }}
                   />
                 </div>
@@ -1256,7 +1351,7 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                   </div>
                 </div>
               </div>
-              
+
               {/* ✅ ACTION BUTTONS RESTORED HERE */}
               <div className="mt-6 pt-6 border-t border-gray-700">
                 <div className="flex flex-col sm:flex-row gap-4">
@@ -1368,7 +1463,6 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
                   )}
                 </div>
               </div>
-
             </div>
           </div>
         </div>
@@ -1376,8 +1470,8 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${cer
 
       {/* Share Modal */}
       {showShareModal && selectedCertificate && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-800 rounded-2xl max-w-md w-full p-6">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-gray-800 rounded-2xl max-w-md w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold text-white">
                 Share Certificate

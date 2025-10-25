@@ -831,27 +831,29 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden px-4 md:px-8 py-12">
+    <div className="min-h-screen bg-black text-white relative overflow-hidden px-2 sm:px-4 md:px-8 py-6 sm:py-12">
       <div className="absolute top-10 left-10 w-72 h-72 bg-[#2cf2f9]/20 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#f2cb2c]/10 rounded-full blur-3xl animate-pulse-slow" />
 
-      <header className="flex justify-between items-center mb-12 pb-6 border-b border-cyan-400/30 backdrop-blur-lg">
-        <h1 className="text-4xl md:text-4xl font-extrabold bg-[#2cf2f9] bg-clip-text text-transparent animate-glow">
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 sm:mb-12 pb-4 sm:pb-6 border-b border-cyan-400/30 backdrop-blur-lg">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-[#2cf2f9] bg-clip-text text-transparent animate-glow">
           ISSUE CERTIFICATE
         </h1>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
           {walletAddress ? (
             <>
-              <div className="text-right">
-                <p className="text-lg text-gray-400">Connected Wallet</p>
-                <p className="text-sm text-[#2cf2f9] font-mono">
+              <div className="text-right flex-1 sm:flex-none">
+                <p className="text-sm sm:text-lg text-gray-400">
+                  Connected Wallet
+                </p>
+                <p className="text-xs sm:text-sm text-[#2cf2f9] font-mono truncate">
                   {walletAddress.substring(0, 6)}...
                   {walletAddress.substring(walletAddress.length - 4)}
                 </p>
               </div>
               <button
                 onClick={disconnectWallet}
-                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-bold hover:scale-105 transition-transform"
+                className="rounded-lg bg-red-600 px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold hover:scale-105 transition-transform flex-shrink-0"
               >
                 Disconnect
               </button>
@@ -860,14 +862,16 @@ export default function AdminDashboard() {
             <button
               onClick={connectWallet}
               disabled={isConnecting}
-              className="relative overflow-hidden rounded-xl bg-[#2cf2f9] px-6 py-3 text-lg font-bold text-black transition-all hover:scale-105 hover:shadow-[0_0_20px_#2cf2f9]"
+              className="relative overflow-hidden rounded-xl bg-[#2cf2f9] px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-lg font-bold text-black transition-all hover:scale-105 hover:shadow-[0_0_20px_#2cf2f9] w-full sm:w-auto"
             >
               {isConnecting ? (
                 <FaSpinner className="animate-spin" />
               ) : (
                 <FaWallet />
               )}
-              {isConnecting ? "Connecting..." : "Connect Wallet"}
+              <span className="ml-2">
+                {isConnecting ? "Connecting..." : "Connect Wallet"}
+              </span>
               <div className="absolute inset-0 bg-gradient-to-r from-[#2cf2f9]/40 to-[#f2cb2c]/10 opacity-0 hover:opacity-100 blur-md transition-all"></div>
             </button>
           )}
@@ -877,19 +881,19 @@ export default function AdminDashboard() {
       <main className="max-w-7xl mx-auto flex flex-col items-center">
         {!walletAddress ? (
           <StarBorder className="w-full max-w-lg mx-auto">
-            <div className="p-8 md:p-12 flex flex-col items-center text-center">
-              <FaWallet className="text-6xl text-[#2cf2f9] mb-6" />
-              <h2 className="text-2xl font-bold mb-4 text-white">
+            <div className="p-6 sm:p-8 md:p-12 flex flex-col items-center text-center">
+              <FaWallet className="text-4xl sm:text-6xl text-[#2cf2f9] mb-4 sm:mb-6" />
+              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-white">
                 Connect Your Wallet
               </h2>
-              <p className="text-gray-400 mb-6">
+              <p className="text-sm sm:text-base text-gray-400 mb-4 sm:mb-6">
                 Please connect your MetaMask wallet to deploy contracts and mint
                 certificates.
               </p>
               <button
                 onClick={connectWallet}
                 disabled={isConnecting}
-                className="flex items-center gap-2 rounded-lg bg-[#2cf2f9] px-8 py-4 text-lg font-bold text-black hover:scale-105 transition-transform disabled:opacity-50"
+                className="flex items-center gap-2 rounded-lg bg-[#2cf2f9] px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-lg font-bold text-black hover:scale-105 transition-transform disabled:opacity-50 w-full sm:w-auto"
               >
                 {isConnecting ? (
                   <FaSpinner className="animate-spin" />
@@ -903,38 +907,38 @@ export default function AdminDashboard() {
         ) : (
           <div className="w-full">
             {/* Dashboard Statistics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
               <StarBorder className="w-full">
-                <div className="p-6 text-center bg-black/60 backdrop-blur-md rounded-2xl border border-cyan-400/10 hover:border-[#2cf2f9] transition-all hover:shadow-[0_0_30px_#2cf2f9]/10 animate-fade-in-up">
-                  <FaCertificate className="text-5xl text-[#2cf2f9] mx-auto mb-4 animate-float" />
-                  <h3 className="text-xl font-bold text-white mb-2">
+                <div className="p-4 sm:p-6 text-center bg-black/60 backdrop-blur-md rounded-2xl border border-cyan-400/10 hover:border-[#2cf2f9] transition-all hover:shadow-[0_0_30px_#2cf2f9]/10 animate-fade-in-up">
+                  <FaCertificate className="text-3xl sm:text-5xl text-[#2cf2f9] mx-auto mb-3 sm:mb-4 animate-float" />
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
                     Total Contracts
                   </h3>
-                  <p className="text-3xl font-extrabold text-[#2cf2f9] tracking-wider">
+                  <p className="text-2xl sm:text-3xl font-extrabold text-[#2cf2f9] tracking-wider">
                     {dashboardStats.totalContracts}
                   </p>
                 </div>
               </StarBorder>
 
               <StarBorder className="w-full">
-                <div className="p-6 text-center">
-                  <FaChartBar className="text-4xl text-[#2cf2f9] mx-auto mb-3" />
-                  <h3 className="text-xl font-bold text-white mb-2">
+                <div className="p-4 sm:p-6 text-center">
+                  <FaChartBar className="text-3xl sm:text-4xl text-[#2cf2f9] mx-auto mb-3" />
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
                     Total Certificates
                   </h3>
-                  <p className="text-3xl font-bold text-[#2cf2f9]">
+                  <p className="text-2xl sm:text-3xl font-bold text-[#2cf2f9]">
                     {dashboardStats.totalCertificates}
                   </p>
                 </div>
               </StarBorder>
 
               <StarBorder className="w-full">
-                <div className="p-6 text-center">
-                  <FaClock className="text-4xl text-[#2cf2f9] mx-auto mb-3" />
-                  <h3 className="text-xl font-bold text-white mb-2">
+                <div className="p-4 sm:p-6 text-center">
+                  <FaClock className="text-3xl sm:text-4xl text-[#2cf2f9] mx-auto mb-3" />
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
                     Recent Activity
                   </h3>
-                  <p className="text-3xl font-bold text-[#2cf2f9]">
+                  <p className="text-2xl sm:text-3xl font-bold text-[#2cf2f9]">
                     {dashboardStats.recentActivity.length}
                   </p>
                 </div>
@@ -942,39 +946,39 @@ export default function AdminDashboard() {
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex flex-wrap justify-center gap-4 mb-8">
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-6 sm:mb-8">
               <button
                 onClick={() => setActiveTab("overview")}
-                className={`px-6 py-3 rounded-xl font-semibold relative transition-all ${
+                className={`px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold relative transition-all text-sm sm:text-base ${
                   activeTab === "overview"
                     ? "bg-gradient-to-r from-[#2cf2f9] to-[#2c9cf2] text-black shadow-[0_0_25px_#2cf2f9]"
                     : "bg-black/50 text-gray-300 border border-cyan-400/30 hover:text-white hover:shadow-[0_0_15px_#2cf2f9]"
                 }`}
               >
-                <FaEye className="inline mr-2" />
+                <FaEye className="inline mr-1 sm:mr-2" />
                 Overview
               </button>
 
               <button
                 onClick={() => setActiveTab("contracts")}
-                className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                className={`px-3 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all text-sm sm:text-base ${
                   activeTab === "contracts"
                     ? "bg-gradient-to-r from-[#2cf2f9] to-[#2c9cf2] text-black shadow-[0_0_25px_#2cf2f9]"
                     : "bg-black/50 text-gray-300 border border-cyan-400/30 hover:text-white hover:shadow-[0_0_15px_#2cf2f9]"
                 }`}
               >
-                <FaCertificate className="inline mr-2" />
+                <FaCertificate className="inline mr-1 sm:mr-2" />
                 Contracts
               </button>
               <button
                 onClick={() => setActiveTab("mint")}
-                className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                className={`px-3 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all text-sm sm:text-base ${
                   activeTab === "mint"
                     ? "bg-gradient-to-r from-[#2cf2f9] to-[#2c9cf2] text-black shadow-[0_0_25px_#2cf2f9]"
                     : "bg-black/50 text-gray-300 border border-cyan-400/30 hover:text-white hover:shadow-[0_0_15px_#2cf2f9]"
                 }`}
               >
-                <FaPlus className="inline mr-2" />
+                <FaPlus className="inline mr-1 sm:mr-2" />
                 Mint Certificates
               </button>
             </div>
@@ -1182,16 +1186,16 @@ export default function AdminDashboard() {
 
             {/* Success/Error Messages */}
             {success && (
-              <div className="flex items-center p-4 rounded-lg bg-green-600 mb-6 mt-6">
-                <FaCheckCircle className="text-2xl mr-4" />
+              <div className="flex items-center p-4 rounded-lg bg-green-600/80 backdrop-blur-sm mb-6 mt-6 animate-fade-in border border-green-500/50 shadow-lg shadow-green-500/20">
+                <FaCheckCircle className="text-2xl mr-4 animate-pulse" />
                 <div>
                   <p className="font-semibold text-white">{success}</p>
                 </div>
               </div>
             )}
             {error && (
-              <div className="flex items-center p-4 rounded-lg bg-red-600 mb-6 mt-6">
-                <FaExclamationCircle className="text-2xl mr-4" />
+              <div className="flex items-center p-4 rounded-lg bg-red-600/80 backdrop-blur-sm mb-6 mt-6 animate-fade-in border border-red-500/50 shadow-lg shadow-red-500/20">
+                <FaExclamationCircle className="text-2xl mr-4 animate-pulse" />
                 <div>
                   <p className="font-semibold text-white">Error: {error}</p>
                 </div>
@@ -1271,36 +1275,49 @@ export default function AdminDashboard() {
               </div>
 
               <form onSubmit={deployContract} className="space-y-6">
-                <input
-                  type="text"
-                  name="contractName"
-                  placeholder="Contract Name (e.g., My Certificate Contract)"
-                  value={contractForm.contractName}
-                  onChange={handleContractFormChange}
-                  required
-                  className="w-full bg-gray-700 p-4 rounded-xl border border-gray-600 text-gray-200 placeholder-gray-400 focus:outline-none focus:border-[#2cf2f9] transition-colors"
-                />
-                <select
-                  name="networkName"
-                  value={contractForm.networkName}
-                  onChange={handleContractFormChange}
-                  className="w-full bg-gray-700 p-4 rounded-xl border border-gray-600 text-gray-200 focus:outline-none focus:border-[#2cf2f9] transition-colors"
+                <div
+                  className="animate-slide-up"
+                  style={{ animationDelay: "100ms" }}
                 >
-                  <option value="apothem">XDC Apothem Testnet</option>
-                </select>
+                  <input
+                    type="text"
+                    name="contractName"
+                    placeholder="Contract Name (e.g., My Certificate Contract)"
+                    value={contractForm.contractName}
+                    onChange={handleContractFormChange}
+                    required
+                    className="w-full bg-gray-700/50 backdrop-blur-sm p-4 rounded-xl border border-gray-600/50 text-gray-200 placeholder-gray-400 focus:outline-none focus:border-[#2cf2f9] focus:shadow-lg focus:shadow-[#2cf2f9]/20 transition-all duration-500 hover:border-[#2cf2f9]/50 hover:bg-gray-700 hover:scale-105 hover:shadow-2xl transform"
+                  />
+                </div>
+                <div
+                  className="animate-slide-up"
+                  style={{ animationDelay: "200ms" }}
+                >
+                  <select
+                    name="networkName"
+                    value={contractForm.networkName}
+                    onChange={handleContractFormChange}
+                    className="w-full bg-gray-700/50 backdrop-blur-sm p-4 rounded-xl border border-gray-600/50 text-gray-200 focus:outline-none focus:border-[#2cf2f9] focus:shadow-lg focus:shadow-[#2cf2f9]/20 transition-all duration-500 hover:border-[#2cf2f9]/50 hover:bg-gray-700 hover:scale-105 hover:shadow-2xl transform"
+                  >
+                    <option value="apothem">XDC Apothem Testnet</option>
+                  </select>
+                </div>
 
-                <div className="flex gap-4">
+                <div
+                  className="flex gap-4 animate-slide-up"
+                  style={{ animationDelay: "300ms" }}
+                >
                   <button
                     type="button"
                     onClick={() => setShowCreateContract(false)}
-                    className="flex-1 py-3 px-6 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                    className="flex-1 py-3 px-6 bg-gray-600/50 backdrop-blur-sm text-white rounded-lg hover:bg-gray-700 hover:scale-110 transition-all duration-500 hover:shadow-2xl transform"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 py-3 px-6 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 py-3 px-6 bg-white text-black rounded-lg font-bold hover:bg-gray-200 hover:scale-110 transition-all duration-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 hover:shadow-2xl hover:shadow-white/30 transform"
                   >
                     {loading ? (
                       <FaSpinner className="animate-spin mx-auto" />

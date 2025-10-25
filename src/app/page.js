@@ -7,7 +7,7 @@ import Faq from "./components/faq";
 import Footer from "./components/footer";
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white p-6">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white p-2 sm:p-4 lg:p-6">
       <Navbar />
       <div id="home">
         <LandingPage />
@@ -15,7 +15,7 @@ export default function Home() {
 
       <div
         id="about"
-        className="bg-gray-950 text-white flex flex-col space-y-24 relative z-20"
+        className="bg-gray-950 text-white flex flex-col space-y-12 sm:space-y-16 lg:space-y-24 relative z-20"
       >
         <AboutPage />
       </div>

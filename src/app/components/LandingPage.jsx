@@ -9,103 +9,110 @@ export default function LandingPage() {
   const [showModal, setShowModal] = useState(false);
 
   const handleAdminAccess = () => {
-    
     router.push("/AdminDashboard");
   };
 
   const handleConnectWallet = async () => {
-  // Clear previous connection
-  localStorage.removeItem("walletAddress");
-  
-  if (typeof window.ethereum !== "undefined") {
-    try {
-      setIsLoading(true);
-      
-      // Request accounts - this will show the MetaMask popup
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
+    // Clear previous connection
+    localStorage.removeItem("walletAddress");
 
-      const walletAddress = accounts[0];
-      // Wallet connected successfully
+    if (typeof window.ethereum !== "undefined") {
+      try {
+        setIsLoading(true);
 
-      // Check if we're on the correct network (XDC Apothem)
-      const chainId = await window.ethereum.request({ method: "eth_chainId" });
-      const apothemChainId = "0x33"; // XDC Apothem Testnet
+        // Request accounts - this will show the MetaMask popup
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
 
-      if (chainId !== apothemChainId) {
-        try {
-          await window.ethereum.request({
-            method: "wallet_switchEthereumChain",
-            params: [{ chainId: apothemChainId }],
-          });
-        } catch (switchError) {
-          // If network doesn't exist, add it
-          if (switchError.code === 4902) {
+        const walletAddress = accounts[0];
+        // Wallet connected successfully
+
+        // Check if we're on the correct network (XDC Apothem)
+        const chainId = await window.ethereum.request({
+          method: "eth_chainId",
+        });
+        const apothemChainId = "0x33"; // XDC Apothem Testnet
+
+        if (chainId !== apothemChainId) {
+          try {
             await window.ethereum.request({
-              method: "wallet_addEthereumChain",
-              params: [
-                {
-                  chainId: apothemChainId,
-                  chainName: "XDC Apothem Network",
-                  nativeCurrency: { name: "XDC", symbol: "XDC", decimals: 18 },
-                  rpcUrls: ["https://erpc.apothem.network"],
-                  blockExplorerUrls: ["https://explorer.apothem.network/"],
-                },
-              ],
+              method: "wallet_switchEthereumChain",
+              params: [{ chainId: apothemChainId }],
             });
-          } else {
-            throw switchError;
+          } catch (switchError) {
+            // If network doesn't exist, add it
+            if (switchError.code === 4902) {
+              await window.ethereum.request({
+                method: "wallet_addEthereumChain",
+                params: [
+                  {
+                    chainId: apothemChainId,
+                    chainName: "XDC Apothem Network",
+                    nativeCurrency: {
+                      name: "XDC",
+                      symbol: "XDC",
+                      decimals: 18,
+                    },
+                    rpcUrls: ["https://erpc.apothem.network"],
+                    blockExplorerUrls: ["https://explorer.apothem.network/"],
+                  },
+                ],
+              });
+            } else {
+              throw switchError;
+            }
           }
         }
-      }
 
-      localStorage.setItem("walletAddress", walletAddress);
+        localStorage.setItem("walletAddress", walletAddress);
 
-      // Redirect to dashboard
-      router.push("/participant-dashboard");
-    } catch (err) {
-      // console.error(err);
-      if (err.code === 4001) {
-        alert("Connection rejected by user");
-      } else if (err.code === 4902) {
-        alert("Please add XDC Apothem Network to your MetaMask");
-      } else {
-        alert("Wallet connection failed: " + (err.message || "Unknown error"));
+        // Redirect to dashboard
+        router.push("/participant-dashboard");
+      } catch (err) {
+        // console.error(err);
+        if (err.code === 4001) {
+          alert("Connection rejected by user");
+        } else if (err.code === 4902) {
+          alert("Please add XDC Apothem Network to your MetaMask");
+        } else {
+          alert(
+            "Wallet connection failed: " + (err.message || "Unknown error")
+          );
+        }
+      } finally {
+        setIsLoading(false);
       }
-    } finally {
-      setIsLoading(false);
+    } else {
+      alert(
+        "MetaMask is not installed! Please install it from https://metamask.io/"
+      );
     }
-  } else {
-    alert(
-      "MetaMask is not installed! Please install it from https://metamask.io/"
-    );
-  }
-};
+  };
 
   return (
     <section
       id="home"
-      className="min-h-screen flex flex-col items-center justify-center px-4 py-20 relative select-none"
+      className="min-h-screen flex flex-col items-center justify-center px-2 sm:px-4 py-12 sm:py-20 relative select-none"
     >
       {/* Grid Background - Full screen */}
 
       {/* Content overlay */}
       <div className="max-w-7xl w-full flex flex-col lg:flex-row items-start justify-start z-50 ">
         <div className="flex-1 max-w-2xl text-left">
-          <h1 className=" px-6 py-6 text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
+          <h1 className="px-4 sm:px-6 py-4 sm:py-6 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
             CERTIMOS.
           </h1>
 
-          <p className=" px-6 py-6 opacity-55 text-xl md:text-2xl lg:text-3xl mt-4 mb-8 text-white">
+          <p className="px-4 sm:px-6 py-4 sm:py-6 opacity-55 text-lg sm:text-xl md:text-2xl lg:text-3xl mt-2 sm:mt-4 mb-6 sm:mb-8 text-white">
             Tamper-proof, permanent, and verifiable credentials
           </p>
 
-          <div className="flex flex-col md:flex-row gap-4 justify-start">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-start px-4 sm:px-6">
             <button
               onClick={handleAdminAccess}
               disabled={isLoading}
-              className="relative  rounded-lg bg-white text-black px-6 py-4 text-2xl font-bold hover:scale-105 transition-transform"
+              className="relative rounded-lg bg-white text-black px-4 sm:px-6 py-3 sm:py-4 text-lg sm:text-xl lg:text-2xl font-bold hover:scale-105 transition-transform w-full sm:w-auto"
             >
               ISSUE CERTIFICATES
             </button>
@@ -113,7 +120,7 @@ export default function LandingPage() {
             <button
               onClick={handleConnectWallet}
               disabled={isLoading}
-              className="relative rounded-lg bg-black text-white px-8 py-4 text-2xl font-bold hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+              className="relative rounded-lg bg-black text-white px-6 sm:px-8 py-3 sm:py-4 text-lg sm:text-xl lg:text-2xl font-bold hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">

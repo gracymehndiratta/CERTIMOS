@@ -35,22 +35,22 @@ export default function Navbar() {
             : "bg-transparent"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 flex items-center relative h-16">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 flex items-center relative h-14 sm:h-16">
           {/* Logo */}
-          <div className="relative w-[140px] h-[50px] flex items-center group">
+          <div className="relative w-[100px] sm:w-[140px] h-[40px] sm:h-[50px] flex items-center group">
             <Image
               src="/logo.webp"
               alt="Logo"
               fill
               className="object-contain"
             />
-            <p className="text-2xl font-extrabold ml-36 text-white tracking-wide group-hover:text-[#54D1DC] transition-colors duration-300">
+            <p className="text-lg sm:text-2xl font-extrabold ml-24 sm:ml-36 text-white tracking-wide group-hover:text-[#54D1DC] transition-colors duration-300">
               CERTIMOS
             </p>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center px-9 lg:px-28 py-2 bg-[#3e4040cc] backdrop-blur-md rounded-full shadow-lg border border-white/10 gap-8">
+          <nav className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center px-6 lg:px-9 xl:px-28 py-2 bg-[#3e4040cc] backdrop-blur-md rounded-full shadow-lg border border-white/10 gap-4 lg:gap-8">
             {navItems.map(({ label, path }, i) => (
               <motion.a
                 key={label}
@@ -58,7 +58,7 @@ export default function Navbar() {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="text-lg lg:text-xl font-semibold text-white hover:text-[#54D1DC] transition-colors duration-300 relative group"
+                className="text-base lg:text-lg xl:text-xl font-semibold text-white hover:text-[#54D1DC] transition-colors duration-300 relative group"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {label}
@@ -67,13 +67,10 @@ export default function Navbar() {
             ))}
           </nav>
 
-         
-          
-
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden ml-auto p-3 bg-[#3e4040cc] backdrop-blur-md rounded-full shadow-lg border border-white/10 text-white transition hover:scale-105"
+            className="md:hidden ml-auto p-2 sm:p-3 bg-[#3e4040cc] backdrop-blur-md rounded-full shadow-lg border border-white/10 text-white transition hover:scale-105"
           >
             <motion.svg
               initial={false}
@@ -123,9 +120,9 @@ export default function Navbar() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -30, opacity: 0 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
-              className="absolute top-20 left-4 right-4 bg-[#2a2a2a] backdrop-blur-md rounded-2xl shadow-2xl border border-white/10 py-6"
+              className="absolute top-16 sm:top-20 left-2 sm:left-4 right-2 sm:right-4 bg-[#2a2a2a] backdrop-blur-md rounded-2xl shadow-2xl border border-white/10 py-4 sm:py-6"
             >
-              <div className="flex flex-col space-y-4 px-6">
+              <div className="flex flex-col space-y-3 sm:space-y-4 px-4 sm:px-6">
                 {navItems.map(({ label, path }, i) => (
                   <motion.a
                     key={label}
@@ -133,7 +130,7 @@ export default function Navbar() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.1 }}
-                    className="text-xl font-semibold text-white hover:text-[#54D1DC] transition-colors duration-200 py-2 border-b border-white/10 last:border-b-0"
+                    className="text-lg sm:text-xl font-semibold text-white hover:text-[#54D1DC] transition-colors duration-200 py-2 border-b border-white/10 last:border-b-0"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {label}
