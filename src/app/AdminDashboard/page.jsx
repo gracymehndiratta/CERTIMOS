@@ -836,7 +836,7 @@ export default function AdminDashboard() {
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#f2cb2c]/10 rounded-full blur-3xl animate-pulse-slow" />
 
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 sm:mb-12 pb-4 sm:pb-6 border-b border-cyan-400/30 backdrop-blur-lg">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-[#2cf2f9] bg-clip-text text-transparent animate-glow">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-bold bg-gradient-to-r from-[#54D1DC] via-blue-400 to-[#54D1DC] bg-[length:200%_200%] bg-clip-text text-transparent ">
           ISSUE CERTIFICATE
         </h1>
         <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
@@ -1260,10 +1260,10 @@ export default function AdminDashboard() {
 
         {/* Create Contract Modal */}
         {showCreateContract && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-black p-8 rounded-lg max-w-md w-full border border-gray-600">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-bold text-white">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-glow ">
+            <div className="bg-gray-800 p-8 rounded-lg max-w-md w-full border-3 border-cyan-300 animate-glow  ">
+              <div className="flex justify-between items-center mb-6 animate-glow">
+                <h3 className="text-2xl font-bold text-cyan-400">
                   Deploy New Contract
                 </h3>
                 <button
@@ -1274,7 +1274,10 @@ export default function AdminDashboard() {
                 </button>
               </div>
 
-              <form onSubmit={deployContract} className="space-y-6">
+              <form
+                onSubmit={deployContract}
+                className="space-y-6 animate-glow "
+              >
                 <div
                   className="animate-slide-up"
                   style={{ animationDelay: "100ms" }}
@@ -1286,7 +1289,7 @@ export default function AdminDashboard() {
                     value={contractForm.contractName}
                     onChange={handleContractFormChange}
                     required
-                    className="w-full bg-gray-700/50 backdrop-blur-sm p-4 rounded-xl border border-gray-600/50 text-gray-200 placeholder-gray-400 focus:outline-none focus:border-[#2cf2f9] focus:shadow-lg focus:shadow-[#2cf2f9]/20 transition-all duration-500 hover:border-[#2cf2f9]/50 hover:bg-gray-700 hover:scale-105 hover:shadow-2xl transform"
+                    className="w-full bg-gray-700/50 backdrop-blur-sm p-4 rounded-xl border  border-gray-600/50 text-gray-200 placeholder-gray-400 focus:outline-none focus:border-[#2cf2f9] focus:shadow-lg focus:shadow-[#2cf2f9]/20 transition-all duration-500 hover:border-[#2cf2f9]/50 hover:bg-gray-700 hover:scale-105 hover:shadow-2xl transform"
                   />
                 </div>
                 <div

@@ -702,7 +702,7 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
       {/* Header */}
-      <header className="border-b border-gray-800 bg-black/80 backdrop-blur-md sticky top-0 z-50 shadow-lg">
+      <header className="border-b border-gray-800 bg-black/80 backdrop-blur-md sticky top-0 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex-1 min-w-0">
@@ -1115,8 +1115,8 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${
 
       {/* Enhanced Certificate Detail Modal */}
       {selectedCertificate && (
-        <div className="fixed  inset-0 bg-black/80 flex items-center justify-center p-4 ">
-          <div className="bg-gray-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-[#54D1DC]/30 shadow-[0_0_20px_#54D1DC] animate-fadeIn scale-95 hover:scale-100 transition-all duration-500">
+        <div className="fixed  inset-0 bg-black/80 flex items-center justify-center p-4 z-10 ">
+          <div className="bg-gray-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-[#54D1DC]/30 shadow-[0_0_20px_#54D1DC] animate-fadeIn scale-95 hover:scale-100 transition-all duration-500 z-10">
             <div className="p-6">
               <div className="flex justify-between items-start mb-6 animate-slideDown">
                 <div>
