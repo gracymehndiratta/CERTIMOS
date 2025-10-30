@@ -968,12 +968,12 @@ Verify on blockchain: https://testnet.xdcscan.com/token/${contractAddress}/${
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {certificates.map((cert, idx) => (
                 <div
-                  key={cert.tokenId}
+                  key={`${cert.tokenId}-${idx}`}
                   onClick={() => handleCertificateClick(cert)}
                   style={{ animationDelay: `${idx * 150}ms` }}
                   className="bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 border border-gray-700 cursor-pointer 
-                     transform transition-all duration-500 animate-fade-up 
-                     hover:scale-105 hover:rotate-1 hover:shadow-2xl hover:border-[#54D1DC]/60"
+         transform transition-all duration-500 animate-fade-up 
+         hover:scale-105 hover:rotate-1 hover:shadow-2xl hover:border-[#54D1DC]/60"
                 >
                   {/* Certificate Image */}
                   <div className="z-50 relative mb-4">
