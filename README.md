@@ -54,3 +54,8 @@ Open [http://localhost:3000](http://localhost:3000) with your browser.
 - MetaMask wallet integration
 - XDC Apothem testnet
 - IPFS via Pinata for metadata storage
+
+
+##Backend Repo 
+
+Visit github.com/harxhe/certimos-backend
