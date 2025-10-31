@@ -58,4 +58,4 @@ Open [http://localhost:3000](http://localhost:3000) with your browser.
 
 ##Backend Repo 
 
-Visit github.com/harxhe/certimos-backend
+Visit [github.com/harxhe/certimos-backend](github.com/harxhe/certimos-backend)
